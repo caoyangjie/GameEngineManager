@@ -166,9 +166,12 @@ public class SysUserServiceImpl implements ISysUserService {
         user.setSex("0"); // 未知性别
         user.setCreateTime(new Date());
         
-        // 如果有招聘者ID，可以存储到备注中（或者创建新字段）
+        // 设置用户分类：如果有招聘者ID，则设置为招聘者，否则为玩家
         if (recruiterId != null && !recruiterId.trim().isEmpty()) {
+            user.setUserCategory("recruiter"); // 招聘者
             user.setRemark("RecruiterId: " + recruiterId);
+        } else {
+            user.setUserCategory("player"); // 玩家
         }
         
         // 插入用户
@@ -196,6 +199,33 @@ public class SysUserServiceImpl implements ISysUserService {
         // 1. 生成重置令牌
         // 2. 存储令牌（可以存到Redis，设置过期时间）
         // 3. 发送包含重置链接的邮件
+    }
+    
+    /**
+     * 更新用户密码
+     * 
+     * @param userId 用户ID
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     */
+    @Override
+    public void updatePassword(Long userId, String oldPassword, String newPassword) {
+        SysUser user = selectUserById(userId);
+        if (user == null) {
+            throw new ServiceException("user.not.exists");
+        }
+        
+        // 验证旧密码
+        if (!SecurityUtils.matchesPassword(oldPassword, user.getPassword())) {
+            throw new ServiceException("password.error");
+        }
+        
+        // 更新密码
+        SysUser updateUser = new SysUser();
+        updateUser.setUserId(userId);
+        updateUser.setPassword(SecurityUtils.encryptPassword(newPassword));
+        updateUser.setUpdateTime(new Date());
+        userMapper.updateById(updateUser);
     }
 }
 

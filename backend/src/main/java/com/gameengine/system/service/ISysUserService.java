@@ -87,5 +87,14 @@ public interface ISysUserService {
      * @param email 邮箱
      */
     void sendPasswordResetEmail(String email);
+    
+    /**
+     * 更新用户密码
+     * 
+     * @param userId 用户ID
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     */
+    void updatePassword(Long userId, String oldPassword, String newPassword);
 }
 

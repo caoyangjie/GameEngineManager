@@ -8,6 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <id     property="userId"       column="user_id"      />
         <result property="userName"      column="user_name"    />
         <result property="nickName"      column="nick_name"   />
+        <result property="userCategory"  column="user_category" />
         <result property="email"         column="email"        />
         <result property="phonenumber"   column="phonenumber" />
         <result property="sex"           column="sex"         />
@@ -25,7 +26,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
     
     <sql id="selectUserVo">
-        select user_id, user_name, nick_name, email, phonenumber, sex, avatar, password, status, del_flag, login_ip, login_date, create_by, create_time, remark
+        select user_id, user_name, nick_name, user_category, email, phonenumber, sex, avatar, password, status, del_flag, login_ip, login_date, create_by, create_time, update_by, update_time, remark
         from sys_user
     </sql>
     

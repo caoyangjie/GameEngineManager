@@ -28,6 +28,9 @@ public class SysUser extends BaseEntity {
     /** 用户昵称 */
     private String nickName;
     
+    /** 用户分类（player:玩家 recruiter:招聘者 admin:管理员） */
+    private String userCategory;
+    
     /** 用户邮箱 */
     private String email;
     
@@ -78,6 +81,14 @@ public class SysUser extends BaseEntity {
     
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+    
+    public String getUserCategory() {
+        return userCategory;
+    }
+    
+    public void setUserCategory(String userCategory) {
+        this.userCategory = userCategory;
     }
     
     public String getEmail() {

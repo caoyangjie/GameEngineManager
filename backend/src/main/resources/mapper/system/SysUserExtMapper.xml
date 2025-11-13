@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.SysUserExtMapper">
+    
+    <resultMap type="com.gameengine.system.domain.SysUserExt" id="SysUserExtResult">
+        <id     property="extId"           column="ext_id"          />
+        <result property="userId"          column="user_id"         />
+        <result property="recruitmentLink" column="recruitment_link" />
+        <result property="currentLevel"    column="current_level"   />
+        <result property="playerId"        column="player_id"       />
+        <result property="bep20Address"    column="bep20_address"   />
+        <result property="createTime"      column="create_time"     />
+        <result property="updateTime"      column="update_time"     />
+    </resultMap>
+    
+    <sql id="selectUserExtVo">
+        select ext_id, user_id, recruitment_link, current_level, player_id, bep20_address, create_time, update_time
+        from sys_user_ext
+    </sql>
+    
+    <select id="selectByUserId" parameterType="Long" resultMap="SysUserExtResult">
+        <include refid="selectUserExtVo"/>
+        where user_id = #{userId}
+    </select>
+</mapper>
