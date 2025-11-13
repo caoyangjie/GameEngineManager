@@ -9,6 +9,18 @@ const service = axios.create({
   timeout: 10000,
 })
 
+// 获取当前语言设置
+function getCurrentLocale() {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('locale') || 'zh-CN'
+    }
+  } catch (e) {
+    console.warn('Failed to access localStorage:', e)
+  }
+  return 'zh-CN'
+}
+
 // 请求拦截器
 service.interceptors.request.use(
   (config) => {
@@ -16,6 +28,13 @@ service.interceptors.request.use(
     if (userStore.token) {
       config.headers['Authorization'] = 'Bearer ' + userStore.token
     }
+    
+    // 添加语言设置到请求头，后端根据此请求头返回对应语言的响应
+    const locale = getCurrentLocale()
+    if (locale) {
+      config.headers['lang'] = locale
+    }
+    
     return config
   },
   (error) => {

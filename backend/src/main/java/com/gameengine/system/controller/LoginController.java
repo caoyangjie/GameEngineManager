@@ -1,22 +1,30 @@
 package com.gameengine.system.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gameengine.common.core.domain.AjaxResult;
+import com.gameengine.common.core.exception.ServiceException;
+import com.gameengine.common.utils.CaptchaUtils;
 import com.gameengine.common.utils.JwtUtils;
 import com.gameengine.common.utils.MessageUtils;
 import com.gameengine.framework.web.controller.BaseController;
 import com.gameengine.system.domain.SysUser;
+import com.gameengine.system.domain.dto.CaptchaResult;
 import com.gameengine.system.domain.dto.LoginBody;
 import com.gameengine.system.domain.dto.LoginResult;
 import com.gameengine.system.domain.dto.UserInfo;
@@ -40,6 +48,69 @@ public class LoginController extends BaseController {
     @Autowired
     private JwtUtils jwtUtils;
     
+    @Autowired
+    private CaptchaUtils captchaUtils;
+    
+    @Value("${gameengine.demoEnabled:false}")
+    private boolean demoEnabled;
+    
+    /** 验证码存储（UUID -> 验证码） */
+    private static final Map<String, CaptchaInfo> CAPTCHA_STORE = new ConcurrentHashMap<>();
+    
+    /** 验证码有效期（分钟） */
+    private static final int CAPTCHA_EXPIRE_MINUTES = 5;
+    
+    /**
+     * 验证码信息
+     */
+    private static class CaptchaInfo {
+        String code;
+        long expireTime;
+        
+        CaptchaInfo(String code, long expireTime) {
+            this.code = code;
+            this.expireTime = expireTime;
+        }
+        
+        boolean isExpired() {
+            return System.currentTimeMillis() > expireTime;
+        }
+    }
+    
+    /**
+     * 获取验证码
+     * 
+     * @return 验证码信息
+     */
+    @Operation(summary = "获取验证码", description = "获取登录验证码")
+    @GetMapping("/captchaImage")
+    public AjaxResult getCaptchaImage() {
+        // 生成UUID
+        String uuid = UUID.randomUUID().toString();
+        
+        // 生成验证码
+        String[] captcha = captchaUtils.generateCaptcha();
+        String code = captcha[0];
+        String img = captcha[1];
+        
+        // 存储验证码（5分钟过期）
+        long expireTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(CAPTCHA_EXPIRE_MINUTES);
+        CAPTCHA_STORE.put(uuid, new CaptchaInfo(code, expireTime));
+        
+        // 清理过期的验证码
+        cleanupExpiredCaptcha();
+        
+        CaptchaResult result = new CaptchaResult();
+        result.setUuid(uuid);
+        result.setImg(img);
+        // 开发环境返回验证码文本，方便测试
+        if (demoEnabled) {
+            result.setCode(code);
+        }
+        
+        return AjaxResult.success(result);
+    }
+    
     /**
      * 登录方法
      * 
@@ -49,6 +120,11 @@ public class LoginController extends BaseController {
     @Operation(summary = "用户登录", description = "根据用户名和密码登录系统")
     @PostMapping("/login")
     public AjaxResult login(@Valid @RequestBody LoginBody loginBody, HttpServletRequest request) {
+        // 验证验证码
+        if (loginBody.getUuid() != null && !loginBody.getUuid().isEmpty()) {
+            validateCaptcha(loginBody.getUuid(), loginBody.getCode());
+        }
+        
         // 用户验证
         SysUser user = userService.login(loginBody.getUsername(), loginBody.getPassword());
         
@@ -58,6 +134,11 @@ public class LoginController extends BaseController {
         // 记录登录信息
         String loginIp = getIpAddr(request);
         userService.recordLoginInfo(user.getUserId(), loginIp);
+        
+        // 删除验证码
+        if (loginBody.getUuid() != null && !loginBody.getUuid().isEmpty()) {
+            CAPTCHA_STORE.remove(loginBody.getUuid());
+        }
         
         LoginResult loginResult = new LoginResult();
         loginResult.setToken(token);
@@ -122,6 +203,33 @@ public class LoginController extends BaseController {
             token = token.substring(7);
         }
         return token;
+    }
+    
+    /**
+     * 验证验证码
+     * 
+     * @param uuid 验证码UUID
+     * @param code 验证码
+     */
+    private void validateCaptcha(String uuid, String code) {
+        CaptchaInfo captchaInfo = CAPTCHA_STORE.get(uuid);
+        if (captchaInfo == null) {
+            throw new ServiceException(MessageUtils.message("captcha.expired"), 400);
+        }
+        if (captchaInfo.isExpired()) {
+            CAPTCHA_STORE.remove(uuid);
+            throw new ServiceException(MessageUtils.message("captcha.expired"), 400);
+        }
+        if (!captchaInfo.code.equalsIgnoreCase(code)) {
+            throw new ServiceException(MessageUtils.message("captcha.error"), 400);
+        }
+    }
+    
+    /**
+     * 清理过期的验证码
+     */
+    private void cleanupExpiredCaptcha() {
+        CAPTCHA_STORE.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
     
     /**

@@ -35,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // 配置请求授权
             .authorizeRequests()
                 // 允许访问登录接口
-                .antMatchers("/login", "/logout", "/getInfo").permitAll()
+                .antMatchers("/login", "/logout", "/getInfo", "/captchaImage").permitAll()
                 // 允许访问 Swagger 相关路径（SpringDoc OpenAPI）
                 .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/doc.html", "/webjars/**", 
                              "/v3/api-docs/**", "/swagger-resources/**", "/favicon.ico").permitAll()

@@ -22,6 +22,7 @@ import com.gameengine.system.service.ISysUserService;
 @Service
 public class SysUserServiceImpl implements ISysUserService {
     
+    private static final String LOCK_STATUS = "0";
     @Autowired
     private SysUserMapper userMapper;
     
@@ -89,7 +90,7 @@ public class SysUserServiceImpl implements ISysUserService {
         if (user == null) {
             throw new ServiceException("user.not.exists");
         }
-        if (!"0".equals(user.getStatus())) {
+        if (!LOCK_STATUS.equals(user.getStatus())) {
             throw new ServiceException("user.disabled");
         }
         if (!SecurityUtils.matchesPassword(password, user.getPassword())) {
