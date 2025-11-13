@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.MemberTransactionMapper">
+    
+    <resultMap type="com.gameengine.system.domain.MemberTransaction" id="MemberTransactionResult">
+        <id     property="transactionId"        column="transaction_id"         />
+        <result property="userId"                column="user_id"                />
+        <result property="transactionType"      column="transaction_type"       />
+        <result property="walletType"            column="wallet_type"            />
+        <result property="actionType"            column="action_type"            />
+        <result property="currencyCode"          column="currency_code"          />
+        <result property="amount"                column="amount"                 />
+        <result property="previousBalance"       column="previous_balance"       />
+        <result property="currentBalance"       column="current_balance"        />
+        <result property="exchangeRate"          column="exchange_rate"          />
+        <result property="relatedTransactionId" column="related_transaction_id"  />
+        <result property="remark"                column="remark"                />
+        <result property="createTime"            column="create_time"            />
+    </resultMap>
+    
+    <sql id="selectMemberTransactionVo">
+        select transaction_id, user_id, transaction_type, wallet_type, action_type,
+               currency_code, amount, previous_balance, current_balance, exchange_rate,
+               related_transaction_id, remark, create_time
+        from member_transaction
+    </sql>
+    
+    <select id="selectTransactionsByUserId" resultMap="MemberTransactionResult">
+        <include refid="selectMemberTransactionVo"/>
+        <where>
+            user_id = #{userId}
+            <if test="startDate != null and startDate != ''">
+                and create_time &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and create_time &lt;= #{endDate}
+            </if>
+            <if test="transactionType != null and transactionType != ''">
+                and transaction_type = #{transactionType}
+            </if>
+            <if test="walletType != null and walletType != ''">
+                and wallet_type = #{walletType}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+</mapper>

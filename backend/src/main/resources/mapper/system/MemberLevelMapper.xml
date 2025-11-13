@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.MemberLevelMapper">
+    
+    <resultMap type="com.gameengine.system.domain.MemberLevel" id="MemberLevelResult">
+        <id     property="levelId"              column="level_id"               />
+        <result property="levelName"            column="level_name"            />
+        <result property="levelCode"            column="level_code"             />
+        <result property="levelSort"            column="level_sort"             />
+        <result property="minTotalDeposit"      column="min_total_deposit"     />
+        <result property="minTotalInvestment"   column="min_total_investment"   />
+        <result property="dailyBountyRate"      column="daily_bounty_rate"     />
+        <result property="unifiAllocationRate"  column="unifi_allocation_rate"  />
+        <result property="withdrawalFeeRate"    column="withdrawal_fee_rate"    />
+        <result property="levelIcon"            column="level_icon"             />
+        <result property="levelColor"           column="level_color"            />
+        <result property="levelDesc"            column="level_desc"             />
+        <result property="status"               column="status"                />
+        <result property="createBy"             column="create_by"              />
+        <result property="createTime"           column="create_time"            />
+        <result property="updateBy"             column="update_by"              />
+        <result property="updateTime"            column="update_time"           />
+        <result property="remark"                column="remark"                />
+    </resultMap>
+    
+    <sql id="selectMemberLevelVo">
+        select level_id, level_name, level_code, level_sort, min_total_deposit, min_total_investment,
+               daily_bounty_rate, unifi_allocation_rate, withdrawal_fee_rate, level_icon, level_color,
+               level_desc, status, create_by, create_time, update_by, update_time, remark
+        from member_level
+    </sql>
+    
+    <select id="selectEnabledLevels" resultMap="MemberLevelResult">
+        <include refid="selectMemberLevelVo"/>
+        where status = '0'
+        order by level_sort asc
+    </select>
+    
+    <select id="selectByLevelCode" parameterType="String" resultMap="MemberLevelResult">
+        <include refid="selectMemberLevelVo"/>
+        where level_code = #{levelCode}
+    </select>
+</mapper>

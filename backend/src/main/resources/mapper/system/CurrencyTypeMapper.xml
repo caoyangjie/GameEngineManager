@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.CurrencyTypeMapper">
+    
+    <resultMap type="com.gameengine.system.domain.CurrencyType" id="CurrencyTypeResult">
+        <id     property="currencyId"       column="currency_id"        />
+        <result property="currencyCode"     column="currency_code"      />
+        <result property="currencyName"     column="currency_name"      />
+        <result property="currencySymbol"   column="currency_symbol"    />
+        <result property="currencyIcon"     column="currency_icon"      />
+        <result property="decimals"         column="decimals"           />
+        <result property="isTradable"       column="is_tradable"        />
+        <result property="exchangeRate"     column="exchange_rate"      />
+        <result property="status"           column="status"             />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateTime"       column="update_time"       />
+    </resultMap>
+    
+    <sql id="selectCurrencyTypeVo">
+        select currency_id, currency_code, currency_name, currency_symbol, currency_icon,
+               decimals, is_tradable, exchange_rate, status, create_time, update_time
+        from currency_type
+    </sql>
+    
+    <select id="selectTradableCurrencies" resultMap="CurrencyTypeResult">
+        <include refid="selectCurrencyTypeVo"/>
+        where status = '0' and is_tradable = 1
+        order by currency_code
+    </select>
+    
+    <select id="selectByCurrencyCode" parameterType="String" resultMap="CurrencyTypeResult">
+        <include refid="selectCurrencyTypeVo"/>
+        where currency_code = #{currencyCode}
+    </select>
+</mapper>

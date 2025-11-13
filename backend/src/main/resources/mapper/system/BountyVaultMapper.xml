@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.BountyVaultMapper">
+    
+    <resultMap type="com.gameengine.system.domain.BountyVault" id="BountyVaultResult">
+        <id     property="vaultId"         column="vault_id"          />
+        <result property="userId"           column="user_id"           />
+        <result property="currencyCode"     column="currency_code"     />
+        <result property="totalBounty"      column="total_bounty"      />
+        <result property="autoAddJourney"   column="auto_add_journey"  />
+        <result property="createTime"       column="create_time"       />
+        <result property="updateTime"       column="update_time"       />
+    </resultMap>
+    
+    <sql id="selectBountyVaultVo">
+        select vault_id, user_id, currency_code, total_bounty, auto_add_journey, 
+               create_time, update_time
+        from bounty_vault
+    </sql>
+    
+    <select id="selectByUserIdAndCurrency" resultMap="BountyVaultResult">
+        <include refid="selectBountyVaultVo"/>
+        where user_id = #{userId} and currency_code = #{currencyCode}
+    </select>
+</mapper>

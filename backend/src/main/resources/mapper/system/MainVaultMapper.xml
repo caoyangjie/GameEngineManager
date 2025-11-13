@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.MainVaultMapper">
+    
+    <resultMap type="com.gameengine.system.domain.MainVault" id="MainVaultResult">
+        <id     property="vaultId"         column="vault_id"          />
+        <result property="userId"           column="user_id"           />
+        <result property="currencyCode"     column="currency_code"     />
+        <result property="balance"          column="balance"            />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateTime"       column="update_time"       />
+    </resultMap>
+    
+    <sql id="selectMainVaultVo">
+        select vault_id, user_id, currency_code, balance, create_time, update_time
+        from main_vault
+    </sql>
+    
+    <select id="selectByUserIdAndCurrency" resultMap="MainVaultResult">
+        <include refid="selectMainVaultVo"/>
+        where user_id = #{userId} and currency_code = #{currencyCode}
+    </select>
+</mapper>

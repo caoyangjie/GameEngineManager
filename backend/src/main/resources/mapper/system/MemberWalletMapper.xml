@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.MemberWalletMapper">
+    
+    <resultMap type="com.gameengine.system.domain.MemberWallet" id="MemberWalletResult">
+        <id     property="walletId"        column="wallet_id"         />
+        <result property="userId"           column="user_id"           />
+        <result property="currencyCode"     column="currency_code"     />
+        <result property="balance"          column="balance"            />
+        <result property="lockedBalance"    column="locked_balance"     />
+        <result property="totalDeposit"     column="total_deposit"      />
+        <result property="totalWithdrawal"  column="total_withdrawal"   />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateTime"       column="update_time"        />
+    </resultMap>
+    
+    <sql id="selectMemberWalletVo">
+        select wallet_id, user_id, currency_code, balance, locked_balance, 
+               total_deposit, total_withdrawal, create_time, update_time
+        from member_wallet
+    </sql>
+    
+    <select id="selectByUserIdAndCurrency" resultMap="MemberWalletResult">
+        <include refid="selectMemberWalletVo"/>
+        where user_id = #{userId} and currency_code = #{currencyCode}
+    </select>
+</mapper>
