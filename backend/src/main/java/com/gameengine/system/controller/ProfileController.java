@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gameengine.common.core.domain.AjaxResult;
 import com.gameengine.common.core.exception.ServiceException;
+import com.gameengine.common.utils.JourneyLevelUtils;
 import com.gameengine.common.utils.JwtUtils;
 import com.gameengine.common.utils.MessageUtils;
 import com.gameengine.common.utils.QRCodeUtils;
@@ -72,6 +73,10 @@ public class ProfileController extends BaseController {
             userExt.setCurrentLevel("");
             userExt.setPlayerId("");
             userExt.setBep20Address("");
+        } else {
+            // 将数字等级转换为等级名称
+            String levelName = JourneyLevelUtils.convertLevelToName(userExt.getCurrentLevel());
+            userExt.setCurrentLevel(levelName);
         }
         
         return success(userExt);
@@ -98,10 +103,13 @@ public class ProfileController extends BaseController {
         }
         
         // 更新扩展信息
+        // 如果传入的是等级名称，需要转换为数字存储
+        String currentLevel = JourneyLevelUtils.convertNameToLevel(updateBody.getCurrentLevel());
+        
         userExtService.updateUserExt(
             userId,
             updateBody.getRecruitmentLink(),
-            updateBody.getCurrentLevel(),
+            currentLevel,
             updateBody.getPlayerId(),
             updateBody.getBep20Address()
         );
