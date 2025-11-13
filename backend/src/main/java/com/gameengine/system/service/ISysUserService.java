@@ -1,9 +1,9 @@
 package com.gameengine.system.service;
 
-import com.gameengine.system.domain.SysUser;
-
 import java.util.List;
 import java.util.Set;
+
+import com.gameengine.system.domain.SysUser;
 
 /**
  * 用户 业务层
@@ -60,5 +60,32 @@ public interface ISysUserService {
      * @param loginIp 登录IP
      */
     void recordLoginInfo(Long userId, String loginIp);
+    
+    /**
+     * 根据邮箱查询用户
+     * 
+     * @param email 邮箱
+     * @return 用户对象信息
+     */
+    SysUser selectUserByEmail(String email);
+    
+    /**
+     * 用户注册
+     * 
+     * @param firstName 名字
+     * @param lastName 姓氏
+     * @param email 邮箱
+     * @param password 密码
+     * @param recruiterId 招聘者ID（可选）
+     * @return 用户对象信息
+     */
+    SysUser register(String firstName, String lastName, String email, String password, String recruiterId);
+    
+    /**
+     * 发送密码重置邮件
+     * 
+     * @param email 邮箱
+     */
+    void sendPasswordResetEmail(String email);
 }
 

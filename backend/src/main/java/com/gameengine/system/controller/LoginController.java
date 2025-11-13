@@ -25,8 +25,10 @@ import com.gameengine.common.utils.MessageUtils;
 import com.gameengine.framework.web.controller.BaseController;
 import com.gameengine.system.domain.SysUser;
 import com.gameengine.system.domain.dto.CaptchaResult;
+import com.gameengine.system.domain.dto.ForgotPasswordBody;
 import com.gameengine.system.domain.dto.LoginBody;
 import com.gameengine.system.domain.dto.LoginResult;
+import com.gameengine.system.domain.dto.RegisterBody;
 import com.gameengine.system.domain.dto.UserInfo;
 import com.gameengine.system.service.ISysUserService;
 
@@ -192,6 +194,67 @@ public class LoginController extends BaseController {
     @PostMapping("/logout")
     public AjaxResult logout() {
         return success(MessageUtils.message("logout.success"));
+    }
+    
+    /**
+     * 用户注册
+     * 
+     * @param registerBody 注册信息
+     * @return 结果
+     */
+    @Operation(summary = "用户注册", description = "新用户注册")
+    @PostMapping("/register")
+    public AjaxResult register(@Valid @RequestBody RegisterBody registerBody) {
+        // 验证验证码
+        if (registerBody.getUuid() != null && !registerBody.getUuid().isEmpty()) {
+            validateCaptcha(registerBody.getUuid(), registerBody.getCode());
+        }
+        
+        // 验证密码是否匹配
+        if (!registerBody.getPassword().equals(registerBody.getConfirmPassword())) {
+            throw new ServiceException(MessageUtils.message("register.password.mismatch"), 400);
+        }
+        
+        // 注册用户
+        userService.register(
+            registerBody.getFirstName(),
+            registerBody.getLastName(),
+            registerBody.getEmail(),
+            registerBody.getPassword(),
+            registerBody.getRecruiterId()
+        );
+        
+        // 删除验证码
+        if (registerBody.getUuid() != null && !registerBody.getUuid().isEmpty()) {
+            CAPTCHA_STORE.remove(registerBody.getUuid());
+        }
+        
+        return AjaxResult.success(MessageUtils.message("register.success"));
+    }
+    
+    /**
+     * 忘记密码
+     * 
+     * @param forgotPasswordBody 忘记密码信息
+     * @return 结果
+     */
+    @Operation(summary = "忘记密码", description = "发送密码重置邮件")
+    @PostMapping("/forgotPassword")
+    public AjaxResult forgotPassword(@Valid @RequestBody ForgotPasswordBody forgotPasswordBody) {
+        // 验证验证码
+        if (forgotPasswordBody.getUuid() != null && !forgotPasswordBody.getUuid().isEmpty()) {
+            validateCaptcha(forgotPasswordBody.getUuid(), forgotPasswordBody.getCode());
+        }
+        
+        // 发送密码重置邮件
+        userService.sendPasswordResetEmail(forgotPasswordBody.getEmail());
+        
+        // 删除验证码
+        if (forgotPasswordBody.getUuid() != null && !forgotPasswordBody.getUuid().isEmpty()) {
+            CAPTCHA_STORE.remove(forgotPasswordBody.getUuid());
+        }
+        
+        return AjaxResult.success(MessageUtils.message("forgotPassword.resetLinkSent"));
     }
     
     /**
