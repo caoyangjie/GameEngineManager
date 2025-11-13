@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch GameEngineManagerApplication",
+            "request": "launch",
+            "mainClass": "com.gameengine.GameEngineManagerApplication",
+            "projectName": "game-engine-manager",
+            "args": "",
+            "vmArgs": "",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "Launch with Dev Profile",
+            "request": "launch",
+            "mainClass": "com.gameengine.GameEngineManagerApplication",
+            "projectName": "game-engine-manager",
+            "args": "",
+            "vmArgs": "-Dspring.profiles.active=dev",
+            "console": "internalConsole"
+        }
+    ]
+}
+

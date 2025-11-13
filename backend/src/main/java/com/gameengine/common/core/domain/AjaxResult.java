@@ -2,7 +2,6 @@ package com.gameengine.common.core.domain;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 操作消息提醒
@@ -92,7 +91,7 @@ public class AjaxResult extends HashMap<String, Object> implements Serializable 
      * @return 成功消息
      */
     public static AjaxResult success() {
-        return AjaxResult.success("操作成功");
+        return AjaxResult.success(com.gameengine.common.utils.MessageUtils.message("operation.success"));
     }
     
     /**
@@ -101,7 +100,7 @@ public class AjaxResult extends HashMap<String, Object> implements Serializable 
      * @return 成功消息
      */
     public static AjaxResult success(Object data) {
-        return AjaxResult.success("操作成功", data);
+        return AjaxResult.success(com.gameengine.common.utils.MessageUtils.message("operation.success"), data);
     }
     
     /**
@@ -152,7 +151,7 @@ public class AjaxResult extends HashMap<String, Object> implements Serializable 
      * @return 错误消息
      */
     public static AjaxResult error() {
-        return AjaxResult.error("操作失败");
+        return AjaxResult.error(com.gameengine.common.utils.MessageUtils.message("operation.failed"));
     }
     
     /**

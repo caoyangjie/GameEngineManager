@@ -30,5 +30,14 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+# 保留 .vscode 目录中的配置文件，但排除其他文件
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+### Eclipse ###
+.classpath
+.project
+.settings/
 

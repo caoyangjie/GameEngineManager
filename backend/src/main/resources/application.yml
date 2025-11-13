@@ -9,7 +9,7 @@ gameengine:
   # 实例演示开关
   demoEnabled: true
   # 文件路径 示例（ Windows配置D:/gameengine/uploadPath，Linux配置 /home/gameengine/uploadPath）
-  profile: D:/gameengine/uploadPath
+  profile: ~/gameengine/uploadPath
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数组计算 char 字符验证
@@ -18,7 +18,7 @@ gameengine:
 # 开发环境配置
 server:
   # 服务器的HTTP端口
-  port: 8080
+  port: 18080
   servlet:
     # 应用的访问路径
     context-path: /
@@ -50,6 +50,30 @@ spring:
     basename: i18n/messages
   profiles:
     active: druid
+  # Flyway 数据库版本管理配置
+  flyway:
+    # 是否启用 Flyway
+    enabled: true
+    # 迁移脚本位置
+    locations: classpath:db/migration
+    # 迁移脚本表名
+    table: flyway_schema_history
+    # 迁移脚本前缀
+    sql-migration-prefix: V
+    # 迁移脚本分隔符
+    sql-migration-separator: __
+    # 迁移脚本后缀
+    sql-migration-suffixes: .sql
+    # 字符编码
+    encoding: UTF-8
+    # 是否在迁移前进行基线
+    baseline-on-migrate: true
+    # 是否验证迁移
+    validate-on-migrate: true
+    # 验证失败时是否清理
+    clean-on-validation-error: false
+    # 是否允许无序迁移
+    out-of-order: false
   # 文件上传
   servlet:
     multipart:
@@ -90,8 +114,28 @@ spring:
 token:
   # 令牌自定义标识
   header: Authorization
-  # 令牌密钥
-  secret: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+  # 令牌密钥（至少64个字符，满足HS512算法的512位要求）
+  secret: GameEngineManagerSecretKeyForJWTTokenGenerationMustBeAtLeast64CharactersLongForHS512AlgorithmSecurity
   # 令牌有效期（默认30分钟，单位：分钟）
   expireTime: 30
+
+# SpringDoc OpenAPI (Swagger) 配置
+springdoc:
+  api-docs:
+    # API 文档路径
+    path: /v3/api-docs
+    # 是否启用
+    enabled: true
+  swagger-ui:
+    # Swagger UI 路径
+    path: /swagger-ui.html
+    # 是否启用
+    enabled: true
+  # 扫描的包路径
+  packages-to-scan: com.gameengine
+  # 扫描的路径
+  paths-to-match: /**
+  # 使用 Knife4j (Bootstrap UI)
+  knife4j:
+    enable: true
 

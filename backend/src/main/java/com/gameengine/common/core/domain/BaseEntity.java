@@ -1,12 +1,13 @@
 package com.gameengine.common.core.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Entity基类
@@ -18,6 +19,7 @@ public class BaseEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /** 搜索值 */
+    @TableField(exist = false)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String searchValue;
     
@@ -39,6 +41,7 @@ public class BaseEntity implements Serializable {
     private String remark;
     
     /** 请求参数 */
+    @TableField(exist = false)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Map<String, Object> params;
     
