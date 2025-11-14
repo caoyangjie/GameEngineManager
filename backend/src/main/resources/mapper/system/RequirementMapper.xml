@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.RequirementMapper">
+    
+    <resultMap type="com.gameengine.system.domain.Requirement" id="RequirementResult">
+        <id     property="requirementId"          column="requirement_id"           />
+        <result property="parentRequirementId"   column="parent_requirement_id"    />
+        <result property="personaId"             column="persona_id"              />
+        <result property="canvasId"              column="canvas_id"               />
+        <result property="title"                 column="title"                   />
+        <result property="explicitRequirement"   column="explicit_requirement"    />
+        <result property="implicitRequirement"   column="implicit_requirement"    />
+        <result property="requirementList"       column="requirement_list"        />
+        <result property="priority"              column="priority"                />
+        <result property="userPainPoints"        column="user_pain_points"        />
+        <result property="requirementContext"    column="requirement_context"     />
+        <result property="requirementAnalysis"   column="requirement_analysis"    />
+        <result property="createBy"              column="create_by"               />
+        <result property="createTime"            column="create_time"             />
+        <result property="updateBy"              column="update_by"               />
+        <result property="updateTime"            column="update_time"             />
+        <result property="remark"                column="remark"                  />
+    </resultMap>
+    
+    <sql id="selectRequirementVo">
+        select requirement_id, parent_requirement_id, persona_id, canvas_id, title, explicit_requirement, implicit_requirement, 
+               requirement_list, priority, user_pain_points, requirement_context, requirement_analysis,
+               create_by, create_time, update_by, update_time, remark
+        from requirement
+    </sql>
+    
+</mapper>

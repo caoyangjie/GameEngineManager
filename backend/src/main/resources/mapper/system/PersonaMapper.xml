@@ -13,6 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="identity"           column="identity"             />
         <result property="hobbies"            column="hobbies"              />
         <result property="usageScenario"      column="usage_scenario"       />
+        <result property="requirementAnalysis" column="requirement_analysis" />
         <result property="avatar"             column="avatar"               />
         <result property="createBy"           column="create_by"            />
         <result property="createTime"         column="create_time"          />
@@ -22,10 +23,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
     
     <sql id="selectPersonaVo">
-        select persona_id, canvas_id, name, age, gender, identity, hobbies, usage_scenario, avatar,
+        select persona_id, canvas_id, name, age, gender, identity, hobbies, usage_scenario, requirement_analysis, avatar,
                create_by, create_time, update_by, update_time, remark
         from persona
     </sql>
     
 </mapper>
-

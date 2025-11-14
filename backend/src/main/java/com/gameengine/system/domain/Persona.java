@@ -40,6 +40,9 @@ public class Persona extends BaseEntity {
     /** 使用产品的场景 */
     private String usageScenario;
     
+    /** 需求分析内容 */
+    private String requirementAnalysis;
+    
     /** 头像地址 */
     private String avatar;
     
@@ -105,6 +108,14 @@ public class Persona extends BaseEntity {
     
     public void setUsageScenario(String usageScenario) {
         this.usageScenario = usageScenario;
+    }
+    
+    public String getRequirementAnalysis() {
+        return requirementAnalysis;
+    }
+    
+    public void setRequirementAnalysis(String requirementAnalysis) {
+        this.requirementAnalysis = requirementAnalysis;
     }
     
     public String getAvatar() {
