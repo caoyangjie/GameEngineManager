@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.PersonaMapper">
+    
+    <resultMap type="com.gameengine.system.domain.Persona" id="PersonaResult">
+        <id     property="personaId"          column="persona_id"           />
+        <result property="canvasId"           column="canvas_id"            />
+        <result property="name"               column="name"                 />
+        <result property="age"                column="age"                  />
+        <result property="gender"             column="gender"               />
+        <result property="identity"           column="identity"             />
+        <result property="hobbies"            column="hobbies"              />
+        <result property="usageScenario"      column="usage_scenario"       />
+        <result property="avatar"             column="avatar"               />
+        <result property="createBy"           column="create_by"            />
+        <result property="createTime"         column="create_time"          />
+        <result property="updateBy"           column="update_by"            />
+        <result property="updateTime"         column="update_time"          />
+        <result property="remark"             column="remark"               />
+    </resultMap>
+    
+    <sql id="selectPersonaVo">
+        select persona_id, canvas_id, name, age, gender, identity, hobbies, usage_scenario, avatar,
+               create_by, create_time, update_by, update_time, remark
+        from persona
+    </sql>
+    
+</mapper>
+
