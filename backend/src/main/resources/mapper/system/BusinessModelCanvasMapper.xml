@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="com.gameengine.system.domain.BusinessModelCanvas" id="BusinessModelCanvasResult">
         <id     property="canvasId"              column="canvas_id"               />
         <result property="title"                 column="title"                   />
+        <result property="version"               column="version"                 />
         <result property="keyPartners"           column="key_partners"            />
         <result property="keyActivities"         column="key_activities"          />
         <result property="keyResources"          column="key_resources"           />
@@ -25,7 +26,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
     
     <sql id="selectBusinessModelCanvasVo">
-        select canvas_id, title, key_partners, key_activities, key_resources, value_propositions, 
+        select canvas_id, title, version, key_partners, key_activities, key_resources, value_propositions, 
                customer_relationships, channels, customer_segments, cost_structure, revenue_streams, 
                status, create_by, create_time, update_by, update_time, remark
         from business_model_canvas

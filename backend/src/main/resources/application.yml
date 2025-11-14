@@ -116,8 +116,8 @@ token:
   header: Authorization
   # 令牌密钥（至少64个字符，满足HS512算法的512位要求）
   secret: GameEngineManagerSecretKeyForJWTTokenGenerationMustBeAtLeast64CharactersLongForHS512AlgorithmSecurity
-  # 令牌有效期（默认30分钟，单位：分钟）
-  expireTime: 30
+  # 令牌有效期（默认1440分钟，单位：分钟,一天）
+  expireTime: 1440
 
 # SpringDoc OpenAPI (Swagger) 配置
 springdoc:

@@ -22,6 +22,9 @@ public class BusinessModelCanvas extends BaseEntity {
     /** 画布标题 */
     private String title;
     
+    /** 版本 */
+    private String version;
+    
     /** 关键合作 */
     private String keyPartners;
     
@@ -66,6 +69,14 @@ public class BusinessModelCanvas extends BaseEntity {
     
     public void setTitle(String title) {
         this.title = title;
+    }
+    
+    public String getVersion() {
+        return version;
+    }
+    
+    public void setVersion(String version) {
+        this.version = version;
     }
     
     public String getKeyPartners() {
