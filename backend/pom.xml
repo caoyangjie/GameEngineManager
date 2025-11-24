@@ -34,6 +34,7 @@
         <flyway.version>8.5.13</flyway.version>
         <springdoc.version>1.6.15</springdoc.version>
         <knife4j.version>4.4.0</knife4j.version>
+        <payment-thl.version>1.2.1</payment-thl.version>
     </properties>
 
     <dependencies>
@@ -150,6 +151,13 @@
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
             <version>4.3.0</version>
+        </dependency>
+
+        <!-- payment-thl -->
+        <dependency>
+            <groupId>org.thlws</groupId>
+            <artifactId>payment-thl</artifactId>
+            <version>${payment-thl.version}</version>
         </dependency>
 
         <!-- Lombok -->

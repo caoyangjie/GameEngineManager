@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameengine.system.mapper.PaymentConfigMapper">
+    
+    <resultMap type="com.gameengine.system.domain.PaymentConfig" id="PaymentConfigResult">
+        <id     property="id"                column="id"                 />
+        <result property="paymentType"      column="payment_type"      />
+        <result property="configName"       column="config_name"       />
+        <result property="appId"            column="app_id"            />
+        <result property="mchId"            column="mch_id"           />
+        <result property="apiKey"           column="api_key"           />
+        <result property="privateKey"       column="private_key"       />
+        <result property="publicKey"         column="public_key"        />
+        <result property="alipayPublicKey"   column="alipay_public_key" />
+        <result property="signType"         column="sign_type"         />
+        <result property="p12FilePath"      column="p12_file_path"     />
+        <result property="notifyUrl"        column="notify_url"        />
+        <result property="returnUrl"        column="return_url"        />
+        <result property="enabled"          column="enabled"           />
+        <result property="remark"           column="remark"            />
+        <result property="createTime"       column="create_time"       />
+        <result property="updateTime"       column="update_time"       />
+    </resultMap>
+    
+    <sql id="selectPaymentConfigVo">
+        select id, payment_type, config_name, app_id, mch_id, api_key, private_key, public_key,
+               alipay_public_key, sign_type, p12_file_path, notify_url, return_url, enabled, remark,
+               create_time, update_time
+        from payment_config
+    </sql>
+    
+    <select id="findByPaymentTypeAndEnabled" resultMap="PaymentConfigResult">
+        <include refid="selectPaymentConfigVo"/>
+        where payment_type = #{paymentType} and enabled = #{enabled}
+        order by create_time desc
+    </select>
+</mapper>
