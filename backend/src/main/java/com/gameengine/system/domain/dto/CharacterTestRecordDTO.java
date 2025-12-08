@@ -60,6 +60,7 @@ public class CharacterTestRecordDTO {
     public static class CharacterTestItemDTO {
         private String character;
         private String pinyin;
+        private String grade;
         private String status; // null: 未标记, 'correct': 正确, 'incorrect': 错误
         
         public String getCharacter() {
@@ -76,6 +77,14 @@ public class CharacterTestRecordDTO {
         
         public void setPinyin(String pinyin) {
             this.pinyin = pinyin;
+        }
+
+        public String getGrade() {
+            return grade;
+        }
+
+        public void setGrade(String grade) {
+            this.grade = grade;
         }
         
         public String getStatus() {

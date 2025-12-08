@@ -38,6 +38,7 @@ public class CharacterTestController extends BaseController {
      * 获取测试汉字
      * 
      * @param educationLevel 教育阶段: primary(小学), middle(初中), high(高中)
+     * @param grade 年级: 例如 primary-1 表示小学一年级
      * @param count 测试字数
      * @return 测试汉字列表
      */
@@ -45,9 +46,10 @@ public class CharacterTestController extends BaseController {
     @GetMapping("/getCharacters")
     public AjaxResult getCharacters(
             @RequestParam(required = false, defaultValue = "primary") String educationLevel,
+            @RequestParam(required = false) String grade,
             @RequestParam(required = false, defaultValue = "50") Integer count) {
         try {
-            List<CharacterTestDTO> characters = characterTestService.getTestCharacters(educationLevel, count);
+            List<CharacterTestDTO> characters = characterTestService.getTestCharacters(educationLevel, grade, count);
             return success(characters);
         } catch (Exception e) {
             logger.error("获取测试汉字失败", e);

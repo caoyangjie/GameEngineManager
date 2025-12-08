@@ -73,6 +73,7 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
                 dto.setCharacter(obj.getString("character"));
                 dto.setPinyin(obj.getString("pinyin"));
                 dto.setEducationLevel(obj.getString("educationLevel"));
+                dto.setGrade(obj.getString("grade"));
                 allCharacters.add(dto);
             }
         } catch (Exception e) {
@@ -94,13 +95,14 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
             dto.setCharacter(primaryChars[i]);
             dto.setPinyin(primaryPinyins[i]);
             dto.setEducationLevel("primary");
+            dto.setGrade("primary-1");
             defaultChars.add(dto);
         }
         return defaultChars;
     }
     
     @Override
-    public List<CharacterTestDTO> getTestCharacters(String educationLevel, Integer count) {
+    public List<CharacterTestDTO> getTestCharacters(String educationLevel, String grade, Integer count) {
         loadCharacters();
         
         if (allCharacters == null || allCharacters.isEmpty()) {
@@ -110,7 +112,10 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
         // 根据教育阶段筛选汉字
         List<CharacterTestDTO> filteredChars = allCharacters.stream()
             .filter(charDto -> {
-                if (educationLevel == null || educationLevel.isEmpty()) {
+                if (StringUtils.isNotEmpty(grade)) {
+                    return grade.equals(charDto.getGrade());
+                }
+                if (StringUtils.isEmpty(educationLevel)) {
                     return true;
                 }
                 return educationLevel.equals(charDto.getEducationLevel());

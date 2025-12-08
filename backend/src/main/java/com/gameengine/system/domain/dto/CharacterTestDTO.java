@@ -15,6 +15,9 @@ public class CharacterTestDTO {
     
     /** 教育阶段: primary(小学), middle(初中), high(高中) */
     private String educationLevel;
+
+    /** 年级标识，如 primary-1 表示小学一年级 */
+    private String grade;
     
     public String getCharacter() {
         return character;
@@ -38,6 +41,14 @@ public class CharacterTestDTO {
     
     public void setEducationLevel(String educationLevel) {
         this.educationLevel = educationLevel;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 }
 

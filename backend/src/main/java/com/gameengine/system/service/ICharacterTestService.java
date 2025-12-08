@@ -18,10 +18,11 @@ public interface ICharacterTestService {
      * 根据教育阶段和数量获取测试汉字
      * 
      * @param educationLevel 教育阶段: primary(小学), middle(初中), high(高中)
+     * @param grade 年级（可选，例如 primary-1 表示小学一年级）
      * @param count 测试字数
      * @return 测试汉字列表
      */
-    List<CharacterTestDTO> getTestCharacters(String educationLevel, Integer count);
+    List<CharacterTestDTO> getTestCharacters(String educationLevel, String grade, Integer count);
     
     /**
      * 获取所有汉字
