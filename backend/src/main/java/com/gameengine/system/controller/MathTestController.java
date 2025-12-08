@@ -14,61 +14,50 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gameengine.common.core.domain.AjaxResult;
 import com.gameengine.framework.web.controller.BaseController;
-import com.gameengine.system.domain.dto.CharacterTestDTO;
-import com.gameengine.system.domain.dto.CharacterTestRecordDTO;
-import com.gameengine.system.service.ICharacterTestService;
+import com.gameengine.system.domain.dto.MathTestRecordDTO;
+import com.gameengine.system.service.IMathTestService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * 识字测试控制器
+ * 数学测试控制器
  * 
  * @author GameEngine
  */
-@Tag(name = "识字测试", description = "儿童识字测试表相关功能")
+@Tag(name = "数学测试", description = "小学生数学测试相关功能")
 @RestController
-@RequestMapping("/characterTest")
-public class CharacterTestController extends BaseController {
+@RequestMapping("/mathTest")
+public class MathTestController extends BaseController {
     
     @Autowired
-    private ICharacterTestService characterTestService;
+    private IMathTestService mathTestService;
     
     /**
-     * 获取测试汉字
+     * 生成数学测试题目
      * 
-     * @param educationLevel 教育阶段: primary(小学), middle(初中), high(高中)
-     * @param count 测试字数
-     * @return 测试汉字列表
+     * @param operationTypes 计算类型列表（加减乘除），多个用逗号分隔
+     * @param count 题目数量
+     * @param minNumber 数字范围最小值
+     * @param maxNumber 数字范围最大值
+     * @return 测试题目列表
      */
-    @Operation(summary = "获取测试汉字", description = "根据教育阶段和数量获取测试汉字")
-    @GetMapping("/getCharacters")
-    public AjaxResult getCharacters(
-            @RequestParam(required = false, defaultValue = "primary") String educationLevel,
-            @RequestParam(required = false, defaultValue = "50") Integer count) {
+    @Operation(summary = "生成数学测试题目", description = "根据计算类型、数量和数字范围生成测试题目")
+    @GetMapping("/generateQuestions")
+    public AjaxResult generateQuestions(
+            @RequestParam String operationTypes,
+            @RequestParam Integer count,
+            @RequestParam Integer minNumber,
+            @RequestParam Integer maxNumber) {
         try {
-            List<CharacterTestDTO> characters = characterTestService.getTestCharacters(educationLevel, count);
-            return success(characters);
+            // 将逗号分隔的字符串转换为列表
+            List<String> types = List.of(operationTypes.split(","));
+            List<MathTestRecordDTO.MathTestQuestionDTO> questions = 
+                mathTestService.generateTestQuestions(types, count, minNumber, maxNumber);
+            return success(questions);
         } catch (Exception e) {
-            logger.error("获取测试汉字失败", e);
-            return error("获取测试汉字失败: " + e.getMessage());
-        }
-    }
-    
-    /**
-     * 获取所有汉字
-     * 
-     * @return 所有汉字列表
-     */
-    @Operation(summary = "获取所有汉字", description = "获取所有可用的汉字列表")
-    @GetMapping("/getAllCharacters")
-    public AjaxResult getAllCharacters() {
-        try {
-            List<CharacterTestDTO> characters = characterTestService.getAllCharacters();
-            return success(characters);
-        } catch (Exception e) {
-            logger.error("获取所有汉字失败", e);
-            return error("获取所有汉字失败: " + e.getMessage());
+            logger.error("生成测试题目失败", e);
+            return error("生成测试题目失败: " + e.getMessage());
         }
     }
     
@@ -80,9 +69,39 @@ public class CharacterTestController extends BaseController {
      */
     @Operation(summary = "保存测试记录", description = "保存或更新测试记录")
     @PostMapping("/saveTestRecord")
-    public AjaxResult saveTestRecord(@RequestBody CharacterTestRecordDTO recordDTO) {
+    public AjaxResult saveTestRecord(@RequestBody MathTestRecordDTO recordDTO) {
         try {
-            CharacterTestRecordDTO savedRecord = characterTestService.saveTestRecord(recordDTO);
+            // 计算正确率和统计信息
+            if (recordDTO.getQuestions() != null && !recordDTO.getQuestions().isEmpty()) {
+                int correctCount = 0;
+                int incorrectCount = 0;
+                
+                for (MathTestRecordDTO.MathTestQuestionDTO question : recordDTO.getQuestions()) {
+                    if (question.getStudentAnswer() != null) {
+                        boolean isCorrect = question.getStudentAnswer().equals(question.getCorrectAnswer());
+                        question.setIsCorrect(isCorrect);
+                        if (isCorrect) {
+                            correctCount++;
+                        } else {
+                            incorrectCount++;
+                        }
+                    }
+                }
+                
+                recordDTO.setCorrectCount(correctCount);
+                recordDTO.setIncorrectCount(incorrectCount);
+                
+                // 计算正确率
+                int total = recordDTO.getQuestions().size();
+                if (total > 0) {
+                    int accuracyRate = Math.round((float) correctCount / total * 100);
+                    recordDTO.setAccuracyRate(accuracyRate);
+                } else {
+                    recordDTO.setAccuracyRate(0);
+                }
+            }
+            
+            MathTestRecordDTO savedRecord = mathTestService.saveTestRecord(recordDTO);
             return success(savedRecord);
         } catch (Exception e) {
             logger.error("保存测试记录失败", e);
@@ -99,7 +118,7 @@ public class CharacterTestController extends BaseController {
     @GetMapping("/getAllTestRecords")
     public AjaxResult getAllTestRecords() {
         try {
-            List<CharacterTestRecordDTO> records = characterTestService.getAllTestRecords();
+            List<MathTestRecordDTO> records = mathTestService.getAllTestRecords();
             return success(records);
         } catch (Exception e) {
             logger.error("获取测试记录失败", e);
@@ -117,7 +136,7 @@ public class CharacterTestController extends BaseController {
     @GetMapping("/getTestRecord/{id}")
     public AjaxResult getTestRecordById(@PathVariable Long id) {
         try {
-            CharacterTestRecordDTO record = characterTestService.getTestRecordById(id);
+            MathTestRecordDTO record = mathTestService.getTestRecordById(id);
             if (record == null) {
                 return error("测试记录不存在");
             }
@@ -138,7 +157,7 @@ public class CharacterTestController extends BaseController {
     @DeleteMapping("/deleteTestRecord/{id}")
     public AjaxResult deleteTestRecord(@PathVariable Long id) {
         try {
-            boolean success = characterTestService.deleteTestRecord(id);
+            boolean success = mathTestService.deleteTestRecord(id);
             if (success) {
                 return success("删除成功");
             } else {
@@ -158,11 +177,11 @@ public class CharacterTestController extends BaseController {
      * @param studentName 学生姓名（模糊查询）
      * @param startDate 开始日期
      * @param endDate 结束日期
-     * @param minMasteryRate 最小掌握率
-     * @param maxMasteryRate 最大掌握率
+     * @param minAccuracyRate 最小正确率
+     * @param maxAccuracyRate 最大正确率
      * @return 分页结果
      */
-    @Operation(summary = "分页查询测试记录", description = "分页查询测试记录，支持姓名、日期、掌握率筛选")
+    @Operation(summary = "分页查询测试记录", description = "分页查询测试记录，支持姓名、日期、正确率筛选")
     @GetMapping("/getTestRecordsPage")
     public AjaxResult getTestRecordsPage(
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -170,14 +189,14 @@ public class CharacterTestController extends BaseController {
             @RequestParam(required = false) String studentName,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
-            @RequestParam(required = false) Integer minMasteryRate,
-            @RequestParam(required = false) Integer maxMasteryRate) {
+            @RequestParam(required = false) Integer minAccuracyRate,
+            @RequestParam(required = false) Integer maxAccuracyRate) {
         try {
-            com.baomidou.mybatisplus.extension.plugins.pagination.Page<CharacterTestRecordDTO> page = 
+            com.baomidou.mybatisplus.extension.plugins.pagination.Page<MathTestRecordDTO> page = 
                 new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNum, pageSize);
             
-            com.baomidou.mybatisplus.core.metadata.IPage<CharacterTestRecordDTO> result = 
-                characterTestService.getTestRecordsPage(page, studentName, startDate, endDate, minMasteryRate, maxMasteryRate);
+            com.baomidou.mybatisplus.core.metadata.IPage<MathTestRecordDTO> result = 
+                mathTestService.getTestRecordsPage(page, studentName, startDate, endDate, minAccuracyRate, maxAccuracyRate);
             
             return success(result);
         } catch (Exception e) {

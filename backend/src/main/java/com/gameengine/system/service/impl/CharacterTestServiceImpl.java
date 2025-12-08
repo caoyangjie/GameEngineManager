@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -19,6 +21,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.gameengine.common.utils.StringUtils;
 import com.gameengine.system.domain.CharacterTestRecord;
 import com.gameengine.system.domain.dto.CharacterTestDTO;
 import com.gameengine.system.domain.dto.CharacterTestRecordDTO;
@@ -202,6 +207,87 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
     public boolean deleteTestRecord(Long id) {
         int result = testRecordMapper.deleteById(id);
         return result > 0;
+    }
+    
+    @Override
+    public IPage<CharacterTestRecordDTO> getTestRecordsPage(
+            Page<CharacterTestRecordDTO> page,
+            String studentName,
+            String startDate,
+            String endDate,
+            Integer minMasteryRate,
+            Integer maxMasteryRate) {
+        
+        // 构建查询条件
+        QueryWrapper<CharacterTestRecord> queryWrapper = buildQueryWrapper(
+                studentName, startDate, endDate, minMasteryRate, maxMasteryRate);
+        
+        // 执行分页查询（使用实体类的Page对象）
+        Page<CharacterTestRecord> entityPage = new Page<>(page.getCurrent(), page.getSize());
+        IPage<CharacterTestRecord> entityResult = testRecordMapper.selectPage(entityPage, queryWrapper);
+        
+        // 转换为DTO分页结果
+        Page<CharacterTestRecordDTO> dtoPage = new Page<>(entityResult.getCurrent(), entityResult.getSize(), entityResult.getTotal());
+        List<CharacterTestRecordDTO> dtoList = entityResult.getRecords().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        dtoPage.setRecords(dtoList);
+        
+        return dtoPage;
+    }
+    
+    /**
+     * 构建查询条件
+     */
+    private QueryWrapper<CharacterTestRecord> buildQueryWrapper(
+            String studentName,
+            String startDate,
+            String endDate,
+            Integer minMasteryRate,
+            Integer maxMasteryRate) {
+        
+        QueryWrapper<CharacterTestRecord> queryWrapper = new QueryWrapper<>();
+        
+        // 学生姓名模糊查询
+        if (StringUtils.isNotEmpty(studentName)) {
+            queryWrapper.like("student_name", studentName);
+        }
+        
+        // 日期范围查询
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        if (StringUtils.isNotEmpty(startDate)) {
+            try {
+                Date start = dateFormat.parse(startDate);
+                queryWrapper.ge("test_date", start);
+            } catch (ParseException e) {
+                // 日期格式错误，忽略该条件
+            }
+        }
+        
+        if (StringUtils.isNotEmpty(endDate)) {
+            try {
+                Date end = dateFormat.parse(endDate);
+                // 结束日期需要包含当天，所以加一天，使用lt确保包含当天
+                Date endDateInclusive = new Date(end.getTime() + 24 * 60 * 60 * 1000L);
+                queryWrapper.lt("test_date", endDateInclusive);
+            } catch (ParseException e) {
+                // 日期格式错误，忽略该条件
+            }
+        }
+        
+        // 掌握率范围查询
+        if (minMasteryRate != null) {
+            queryWrapper.ge("mastery_rate", minMasteryRate);
+        }
+        
+        if (maxMasteryRate != null) {
+            queryWrapper.le("mastery_rate", maxMasteryRate);
+        }
+        
+        // 按创建时间倒序
+        queryWrapper.orderByDesc("create_time");
+        
+        return queryWrapper;
     }
     
     /**
