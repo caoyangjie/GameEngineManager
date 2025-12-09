@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.gameengine.common.core.domain.AjaxResult;
+import com.gameengine.common.utils.JwtUtils;
 import com.gameengine.framework.web.controller.BaseController;
 import com.gameengine.system.domain.dto.CharacterTestDTO;
 import com.gameengine.system.domain.dto.CharacterTestRecordDTO;
@@ -33,6 +36,9 @@ public class CharacterTestController extends BaseController {
     
     @Autowired
     private ICharacterTestService characterTestService;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
     
     /**
      * 获取测试汉字
@@ -82,9 +88,13 @@ public class CharacterTestController extends BaseController {
      */
     @Operation(summary = "保存测试记录", description = "保存或更新测试记录")
     @PostMapping("/saveTestRecord")
-    public AjaxResult saveTestRecord(@RequestBody CharacterTestRecordDTO recordDTO) {
+    public AjaxResult saveTestRecord(@RequestBody CharacterTestRecordDTO recordDTO, HttpServletRequest request) {
         try {
-            CharacterTestRecordDTO savedRecord = characterTestService.saveTestRecord(recordDTO);
+            Long userId = getUserIdFromRequest(request);
+            if (userId == null) {
+                return error("未登录或token无效");
+            }
+            CharacterTestRecordDTO savedRecord = characterTestService.saveTestRecord(recordDTO, userId);
             return success(savedRecord);
         } catch (Exception e) {
             logger.error("保存测试记录失败", e);
@@ -99,9 +109,13 @@ public class CharacterTestController extends BaseController {
      */
     @Operation(summary = "获取所有测试记录", description = "获取所有测试记录列表")
     @GetMapping("/getAllTestRecords")
-    public AjaxResult getAllTestRecords() {
+    public AjaxResult getAllTestRecords(HttpServletRequest request) {
         try {
-            List<CharacterTestRecordDTO> records = characterTestService.getAllTestRecords();
+            Long userId = getUserIdFromRequest(request);
+            if (userId == null) {
+                return error("未登录或token无效");
+            }
+            List<CharacterTestRecordDTO> records = characterTestService.getAllTestRecords(userId);
             return success(records);
         } catch (Exception e) {
             logger.error("获取测试记录失败", e);
@@ -117,9 +131,13 @@ public class CharacterTestController extends BaseController {
      */
     @Operation(summary = "获取测试记录", description = "根据ID获取测试记录")
     @GetMapping("/getTestRecord/{id}")
-    public AjaxResult getTestRecordById(@PathVariable Long id) {
+    public AjaxResult getTestRecordById(@PathVariable Long id, HttpServletRequest request) {
         try {
-            CharacterTestRecordDTO record = characterTestService.getTestRecordById(id);
+            Long userId = getUserIdFromRequest(request);
+            if (userId == null) {
+                return error("未登录或token无效");
+            }
+            CharacterTestRecordDTO record = characterTestService.getTestRecordById(id, userId);
             if (record == null) {
                 return error("测试记录不存在");
             }
@@ -138,9 +156,13 @@ public class CharacterTestController extends BaseController {
      */
     @Operation(summary = "删除测试记录", description = "根据ID删除测试记录")
     @DeleteMapping("/deleteTestRecord/{id}")
-    public AjaxResult deleteTestRecord(@PathVariable Long id) {
+    public AjaxResult deleteTestRecord(@PathVariable Long id, HttpServletRequest request) {
         try {
-            boolean success = characterTestService.deleteTestRecord(id);
+            Long userId = getUserIdFromRequest(request);
+            if (userId == null) {
+                return error("未登录或token无效");
+            }
+            boolean success = characterTestService.deleteTestRecord(id, userId);
             if (success) {
                 return success("删除成功");
             } else {
@@ -173,19 +195,38 @@ public class CharacterTestController extends BaseController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) Integer minMasteryRate,
-            @RequestParam(required = false) Integer maxMasteryRate) {
+            @RequestParam(required = false) Integer maxMasteryRate,
+            HttpServletRequest request) {
         try {
+            Long userId = getUserIdFromRequest(request);
+            if (userId == null) {
+                return error("未登录或token无效");
+            }
             com.baomidou.mybatisplus.extension.plugins.pagination.Page<CharacterTestRecordDTO> page = 
                 new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNum, pageSize);
             
             com.baomidou.mybatisplus.core.metadata.IPage<CharacterTestRecordDTO> result = 
-                characterTestService.getTestRecordsPage(page, studentName, startDate, endDate, minMasteryRate, maxMasteryRate);
+                characterTestService.getTestRecordsPage(page, studentName, startDate, endDate, minMasteryRate, maxMasteryRate, userId);
             
             return success(result);
         } catch (Exception e) {
             logger.error("分页查询测试记录失败", e);
             return error("分页查询测试记录失败: " + e.getMessage());
         }
+    }
+    
+    /**
+     * 从请求中解析用户ID
+     */
+    private Long getUserIdFromRequest(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        if (token == null) {
+            return null;
+        }
+        return jwtUtils.getUserIdFromToken(token);
     }
 }
 

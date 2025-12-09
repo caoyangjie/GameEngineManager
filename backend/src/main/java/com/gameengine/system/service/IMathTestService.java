@@ -32,32 +32,36 @@ public interface IMathTestService {
      * 保存测试记录
      * 
      * @param recordDTO 测试记录DTO
+     * @param userId 当前登录用户ID
      * @return 保存后的测试记录DTO
      */
-    MathTestRecordDTO saveTestRecord(MathTestRecordDTO recordDTO);
+    MathTestRecordDTO saveTestRecord(MathTestRecordDTO recordDTO, Long userId);
     
     /**
      * 获取所有测试记录
      * 
+     * @param userId 当前登录用户ID
      * @return 测试记录列表
      */
-    List<MathTestRecordDTO> getAllTestRecords();
+    List<MathTestRecordDTO> getAllTestRecords(Long userId);
     
     /**
      * 根据ID获取测试记录
      * 
      * @param id 测试记录ID
+     * @param userId 当前登录用户ID
      * @return 测试记录DTO
      */
-    MathTestRecordDTO getTestRecordById(Long id);
+    MathTestRecordDTO getTestRecordById(Long id, Long userId);
     
     /**
      * 删除测试记录
      * 
      * @param id 测试记录ID
+     * @param userId 当前登录用户ID
      * @return 是否删除成功
      */
-    boolean deleteTestRecord(Long id);
+    boolean deleteTestRecord(Long id, Long userId);
     
     /**
      * 分页查询测试记录
@@ -68,6 +72,7 @@ public interface IMathTestService {
      * @param endDate 结束日期
      * @param minAccuracyRate 最小正确率
      * @param maxAccuracyRate 最大正确率
+     * @param userId 当前登录用户ID
      * @return 分页结果
      */
     IPage<MathTestRecordDTO> getTestRecordsPage(
@@ -76,6 +81,7 @@ public interface IMathTestService {
             String startDate,
             String endDate,
             Integer minAccuracyRate,
-            Integer maxAccuracyRate);
+            Integer maxAccuracyRate,
+            Long userId);
 }
 

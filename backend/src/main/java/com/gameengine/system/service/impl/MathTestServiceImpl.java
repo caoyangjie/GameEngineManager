@@ -119,17 +119,18 @@ public class MathTestServiceImpl implements IMathTestService {
     }
     
     @Override
-    public MathTestRecordDTO saveTestRecord(MathTestRecordDTO recordDTO) {
+    public MathTestRecordDTO saveTestRecord(MathTestRecordDTO recordDTO, Long userId) {
         MathTestRecord record = new MathTestRecord();
         
         // 如果ID存在，则为更新操作
         if (recordDTO.getId() != null) {
             record = testRecordMapper.selectById(recordDTO.getId());
-            if (record == null) {
-                throw new RuntimeException("测试记录不存在");
+            if (record == null || record.getUserId() == null || !record.getUserId().equals(userId)) {
+                throw new RuntimeException("测试记录不存在或无权访问");
             }
         } else {
             record.setCreateTime(new Date());
+            record.setUserId(userId);
         }
         
         // 设置字段
@@ -165,8 +166,9 @@ public class MathTestServiceImpl implements IMathTestService {
     }
     
     @Override
-    public List<MathTestRecordDTO> getAllTestRecords() {
+    public List<MathTestRecordDTO> getAllTestRecords(Long userId) {
         QueryWrapper<MathTestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
         queryWrapper.orderByDesc("create_time");
         List<MathTestRecord> records = testRecordMapper.selectList(queryWrapper);
         
@@ -176,8 +178,10 @@ public class MathTestServiceImpl implements IMathTestService {
     }
     
     @Override
-    public MathTestRecordDTO getTestRecordById(Long id) {
-        MathTestRecord record = testRecordMapper.selectById(id);
+    public MathTestRecordDTO getTestRecordById(Long id, Long userId) {
+        QueryWrapper<MathTestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id).eq("user_id", userId);
+        MathTestRecord record = testRecordMapper.selectOne(queryWrapper);
         if (record == null) {
             return null;
         }
@@ -185,8 +189,10 @@ public class MathTestServiceImpl implements IMathTestService {
     }
     
     @Override
-    public boolean deleteTestRecord(Long id) {
-        int result = testRecordMapper.deleteById(id);
+    public boolean deleteTestRecord(Long id, Long userId) {
+        QueryWrapper<MathTestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id).eq("user_id", userId);
+        int result = testRecordMapper.delete(queryWrapper);
         return result > 0;
     }
     
@@ -197,11 +203,12 @@ public class MathTestServiceImpl implements IMathTestService {
             String startDate,
             String endDate,
             Integer minAccuracyRate,
-            Integer maxAccuracyRate) {
+            Integer maxAccuracyRate,
+            Long userId) {
         
         // 构建查询条件
         QueryWrapper<MathTestRecord> queryWrapper = buildQueryWrapper(
-                studentName, startDate, endDate, minAccuracyRate, maxAccuracyRate);
+                studentName, startDate, endDate, minAccuracyRate, maxAccuracyRate, userId);
         
         // 执行分页查询（使用实体类的Page对象）
         Page<MathTestRecord> entityPage = new Page<>(page.getCurrent(), page.getSize());
@@ -225,9 +232,11 @@ public class MathTestServiceImpl implements IMathTestService {
             String startDate,
             String endDate,
             Integer minAccuracyRate,
-            Integer maxAccuracyRate) {
+            Integer maxAccuracyRate,
+            Long userId) {
         
         QueryWrapper<MathTestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
         
         // 学生姓名模糊查询
         if (StringUtils.isNotEmpty(studentName)) {
@@ -277,6 +286,7 @@ public class MathTestServiceImpl implements IMathTestService {
     private MathTestRecordDTO convertToDTO(MathTestRecord record) {
         MathTestRecordDTO dto = new MathTestRecordDTO();
         dto.setId(record.getId());
+        dto.setUserId(record.getUserId());
         dto.setStudentName(record.getStudentName());
         dto.setTestDate(record.getTestDate());
         dto.setTestCount(record.getTestCount());

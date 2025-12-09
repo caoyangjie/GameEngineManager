@@ -147,17 +147,18 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
     }
     
     @Override
-    public CharacterTestRecordDTO saveTestRecord(CharacterTestRecordDTO recordDTO) {
+    public CharacterTestRecordDTO saveTestRecord(CharacterTestRecordDTO recordDTO, Long userId) {
         CharacterTestRecord record = new CharacterTestRecord();
         
         // 如果ID存在，则为更新操作
         if (recordDTO.getId() != null) {
             record = testRecordMapper.selectById(recordDTO.getId());
-            if (record == null) {
-                throw new RuntimeException("测试记录不存在");
+            if (record == null || record.getUserId() == null || !record.getUserId().equals(userId)) {
+                throw new RuntimeException("测试记录不存在或无权访问");
             }
         } else {
             record.setCreateTime(new Date());
+            record.setUserId(userId);
         }
         
         // 设置字段
@@ -189,8 +190,9 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
     }
     
     @Override
-    public List<CharacterTestRecordDTO> getAllTestRecords() {
+    public List<CharacterTestRecordDTO> getAllTestRecords(Long userId) {
         QueryWrapper<CharacterTestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
         queryWrapper.orderByDesc("create_time");
         List<CharacterTestRecord> records = testRecordMapper.selectList(queryWrapper);
         
@@ -200,8 +202,10 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
     }
     
     @Override
-    public CharacterTestRecordDTO getTestRecordById(Long id) {
-        CharacterTestRecord record = testRecordMapper.selectById(id);
+    public CharacterTestRecordDTO getTestRecordById(Long id, Long userId) {
+        QueryWrapper<CharacterTestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id).eq("user_id", userId);
+        CharacterTestRecord record = testRecordMapper.selectOne(queryWrapper);
         if (record == null) {
             return null;
         }
@@ -209,8 +213,10 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
     }
     
     @Override
-    public boolean deleteTestRecord(Long id) {
-        int result = testRecordMapper.deleteById(id);
+    public boolean deleteTestRecord(Long id, Long userId) {
+        QueryWrapper<CharacterTestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id).eq("user_id", userId);
+        int result = testRecordMapper.delete(queryWrapper);
         return result > 0;
     }
     
@@ -221,11 +227,12 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
             String startDate,
             String endDate,
             Integer minMasteryRate,
-            Integer maxMasteryRate) {
+            Integer maxMasteryRate,
+            Long userId) {
         
         // 构建查询条件
         QueryWrapper<CharacterTestRecord> queryWrapper = buildQueryWrapper(
-                studentName, startDate, endDate, minMasteryRate, maxMasteryRate);
+                studentName, startDate, endDate, minMasteryRate, maxMasteryRate, userId);
         
         // 执行分页查询（使用实体类的Page对象）
         Page<CharacterTestRecord> entityPage = new Page<>(page.getCurrent(), page.getSize());
@@ -249,9 +256,11 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
             String startDate,
             String endDate,
             Integer minMasteryRate,
-            Integer maxMasteryRate) {
+            Integer maxMasteryRate,
+            Long userId) {
         
         QueryWrapper<CharacterTestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
         
         // 学生姓名模糊查询
         if (StringUtils.isNotEmpty(studentName)) {
@@ -301,6 +310,7 @@ public class CharacterTestServiceImpl implements ICharacterTestService {
     private CharacterTestRecordDTO convertToDTO(CharacterTestRecord record) {
         CharacterTestRecordDTO dto = new CharacterTestRecordDTO();
         dto.setId(record.getId());
+        dto.setUserId(record.getUserId());
         dto.setStudentName(record.getStudentName());
         dto.setTestDate(record.getTestDate());
         dto.setEducationLevel(record.getEducationLevel());

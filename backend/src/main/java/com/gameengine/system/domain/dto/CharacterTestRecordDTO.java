@@ -15,6 +15,9 @@ public class CharacterTestRecordDTO {
     /** 测试记录ID */
     private Long id;
     
+    /** 用户ID，用于数据隔离 */
+    private Long userId;
+    
     /** 学生姓名 */
     private String studentName;
     
@@ -102,6 +105,14 @@ public class CharacterTestRecordDTO {
     
     public void setId(Long id) {
         this.id = id;
+    }
+    
+    public Long getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
     
     public String getStudentName() {
