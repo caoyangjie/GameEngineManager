@@ -1,11 +1,8 @@
 package com.gameengine.system.controller;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -19,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gameengine.common.core.domain.AjaxResult;
 import com.gameengine.common.core.exception.ServiceException;
+import com.gameengine.common.utils.CaptchaStore;
 import com.gameengine.common.utils.CaptchaUtils;
 import com.gameengine.common.utils.JwtUtils;
 import com.gameengine.common.utils.MessageUtils;
@@ -56,29 +54,6 @@ public class LoginController extends BaseController {
     @Value("${gameengine.demoEnabled:false}")
     private boolean demoEnabled;
     
-    /** 验证码存储（UUID -> 验证码） */
-    private static final Map<String, CaptchaInfo> CAPTCHA_STORE = new ConcurrentHashMap<>();
-    
-    /** 验证码有效期（分钟） */
-    private static final int CAPTCHA_EXPIRE_MINUTES = 5;
-    
-    /**
-     * 验证码信息
-     */
-    private static class CaptchaInfo {
-        String code;
-        long expireTime;
-        
-        CaptchaInfo(String code, long expireTime) {
-            this.code = code;
-            this.expireTime = expireTime;
-        }
-        
-        boolean isExpired() {
-            return System.currentTimeMillis() > expireTime;
-        }
-    }
-    
     /**
      * 获取验证码
      * 
@@ -96,11 +71,7 @@ public class LoginController extends BaseController {
         String img = captcha[1];
         
         // 存储验证码（5分钟过期）
-        long expireTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(CAPTCHA_EXPIRE_MINUTES);
-        CAPTCHA_STORE.put(uuid, new CaptchaInfo(code, expireTime));
-        
-        // 清理过期的验证码
-        cleanupExpiredCaptcha();
+        CaptchaStore.store(uuid, code);
         
         CaptchaResult result = new CaptchaResult();
         result.setUuid(uuid);
@@ -139,7 +110,7 @@ public class LoginController extends BaseController {
         
         // 删除验证码
         if (loginBody.getUuid() != null && !loginBody.getUuid().isEmpty()) {
-            CAPTCHA_STORE.remove(loginBody.getUuid());
+            CaptchaStore.remove(loginBody.getUuid());
         }
         
         LoginResult loginResult = new LoginResult();
@@ -226,7 +197,7 @@ public class LoginController extends BaseController {
         
         // 删除验证码
         if (registerBody.getUuid() != null && !registerBody.getUuid().isEmpty()) {
-            CAPTCHA_STORE.remove(registerBody.getUuid());
+            CaptchaStore.remove(registerBody.getUuid());
         }
         
         return AjaxResult.success(MessageUtils.message("register.success"));
@@ -251,7 +222,7 @@ public class LoginController extends BaseController {
         
         // 删除验证码
         if (forgotPasswordBody.getUuid() != null && !forgotPasswordBody.getUuid().isEmpty()) {
-            CAPTCHA_STORE.remove(forgotPasswordBody.getUuid());
+            CaptchaStore.remove(forgotPasswordBody.getUuid());
         }
         
         return AjaxResult.success(MessageUtils.message("forgotPassword.resetLinkSent"));
@@ -275,24 +246,7 @@ public class LoginController extends BaseController {
      * @param code 验证码
      */
     private void validateCaptcha(String uuid, String code) {
-        CaptchaInfo captchaInfo = CAPTCHA_STORE.get(uuid);
-        if (captchaInfo == null) {
-            throw new ServiceException(MessageUtils.message("captcha.expired"), 400);
-        }
-        if (captchaInfo.isExpired()) {
-            CAPTCHA_STORE.remove(uuid);
-            throw new ServiceException(MessageUtils.message("captcha.expired"), 400);
-        }
-        if (!captchaInfo.code.equalsIgnoreCase(code)) {
-            throw new ServiceException(MessageUtils.message("captcha.error"), 400);
-        }
-    }
-    
-    /**
-     * 清理过期的验证码
-     */
-    private void cleanupExpiredCaptcha() {
-        CAPTCHA_STORE.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        CaptchaStore.validate(uuid, code, MessageUtils.message("captcha.expired"), MessageUtils.message("captcha.error"));
     }
     
     /**
