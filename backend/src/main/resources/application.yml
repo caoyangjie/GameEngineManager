@@ -119,6 +119,30 @@ token:
   # 令牌有效期（默认1440分钟，单位：分钟,一天）
   expireTime: 1440
 
+social:
+  auth:
+    # 统一回调基础路径，默认 http://localhost:18080/gameweb/oauth/callback
+    redirectBase: https://vip.opencao.cn/gameweb/oauth/callback
+    # redirectBase: http://localhost:18080/gameweb/oauth/callback
+    wechat:
+      clientId: ${WECHAT_APP_ID:wxbe8ccd279e797514}
+      clientSecret: ${WECHAT_APP_SECRET:c5024ab92271de5ae3b2fe1178faac5e}
+      redirectUri: ${WECHAT_REDIRECT:${social.auth.redirectBase}/wechat}
+      token: myToken
+    qq:
+      clientId: ${QQ_APP_ID:101991774}
+      clientSecret: ${QQ_APP_SECRET:68016062853d2466683872846434175f}
+      redirectUri: ${QQ_REDIRECT:${social.auth.redirectBase}/qq}
+      unionId: true
+    feishu:
+      clientId: ${FEISHU_APP_ID:cli_a014810408774679424}
+      clientSecret: ${FEISHU_APP_SECRET:014810408774679424}
+      redirectUri: ${FEISHU_REDIRECT:${social.auth.redirectBase}/feishu}
+    dingtalk:
+      clientId: ${DINGTALK_APP_ID:ding3d692f82974f21103f3c86269698130}
+      clientSecret: ${DINGTALK_APP_SECRET:92f82974f21103f3c86269698130}
+      redirectUri: ${DINGTALK_REDIRECT:${social.auth.redirectBase}/dingtalk}
+
 # SpringDoc OpenAPI (Swagger) 配置
 springdoc:
   api-docs:

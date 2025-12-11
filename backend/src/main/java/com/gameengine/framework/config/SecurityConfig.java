@@ -36,6 +36,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 // 允许访问登录接口
                 .antMatchers("/login", "/logout", "/getInfo", "/captchaImage", "/register", "/forgotPassword").permitAll()
+                // 第三方登录
+                .antMatchers("/oauth/**").permitAll()
+                // 微信绑定
+                .antMatchers("/weixinbind").permitAll()
                 // 允许访问个人资料接口（需要认证）
                 .antMatchers("/profile/**").authenticated()
                 // 允许访问 Swagger 相关路径（SpringDoc OpenAPI）
