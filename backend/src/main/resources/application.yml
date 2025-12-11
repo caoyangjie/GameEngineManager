@@ -122,7 +122,7 @@ token:
 social:
   auth:
     # 统一回调基础路径，默认 http://localhost:18080/gameweb/oauth/callback
-    redirectBase: https://vip.opencao.cn/gameweb/oauth/callback
+    redirectBase: https://vip.opencao.cn/api/oauth/callback
     # redirectBase: http://localhost:18080/gameweb/oauth/callback
     wechat:
       clientId: ${WECHAT_APP_ID:wxbe8ccd279e797514}
