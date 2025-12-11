@@ -130,8 +130,8 @@ social:
       redirectUri: ${WECHAT_REDIRECT:${social.auth.redirectBase}/wechat}
       token: myToken
     qq:
-      clientId: ${QQ_APP_ID:101991774}
-      clientSecret: ${QQ_APP_SECRET:68016062853d2466683872846434175f}
+      clientId: ${QQ_APP_ID:1112481456}
+      clientSecret: ${QQ_APP_SECRET:FkUwPGsi2KqmKgbK}
       redirectUri: ${QQ_REDIRECT:${social.auth.redirectBase}/qq}
       unionId: true
     feishu:
