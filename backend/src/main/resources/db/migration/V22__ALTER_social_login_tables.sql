@@ -4,7 +4,7 @@
 ALTER TABLE sys_social_user MODIFY COLUMN avatar varchar(2000) DEFAULT NULL COMMENT '头像地址';
 
 -- 用户表添加头像字段
-ALTER TABLE sys_user ADD COLUMN avatar varchar(2000) DEFAULT NULL COMMENT '头像地址';
+ALTER TABLE sys_user MODIFY COLUMN avatar varchar(2000) DEFAULT NULL COMMENT '头像地址';
 
 -- 用户扩展表添加头像字段
-ALTER TABLE sys_user_ext ADD COLUMN avatar varchar(2000) DEFAULT NULL COMMENT '头像地址';
+ALTER TABLE sys_user_ext MODIFY COLUMN avatar varchar(2000) DEFAULT NULL COMMENT '头像地址';
