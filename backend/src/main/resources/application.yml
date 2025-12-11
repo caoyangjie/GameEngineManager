@@ -135,8 +135,8 @@ social:
       redirectUri: ${QQ_REDIRECT:${social.auth.redirectBase}/qq}
       unionId: true
     feishu:
-      clientId: ${FEISHU_APP_ID:cli_a014810408774679424}
-      clientSecret: ${FEISHU_APP_SECRET:014810408774679424}
+      clientId: ${FEISHU_APP_ID:cli_a88d092e52f8101c}
+      clientSecret: ${FEISHU_APP_SECRET:Q4j2KBeQ9qQ1Symr9JBO8cVMVRhiZrqL}
       redirectUri: ${FEISHU_REDIRECT:${social.auth.redirectBase}/feishu}
     dingtalk:
       clientId: ${DINGTALK_APP_ID:ding3d692f82974f21103f3c86269698130}
