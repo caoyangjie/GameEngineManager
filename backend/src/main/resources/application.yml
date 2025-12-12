@@ -163,3 +163,16 @@ springdoc:
   knife4j:
     enable: true
 
+# DeepSeek AI 配置
+deepseek:
+  # API Key（必填，从环境变量或配置文件中获取）
+  api-key: ${DEEPSEEK_API_KEY:}
+  # API 基础 URL（可选，默认使用官方地址）
+  base-url: https://api.deepseek.com
+  # 默认模型（可选，默认为 deepseek-chat）
+  default-model: deepseek-chat
+  # 请求超时时间（毫秒，可选，默认 60000）
+  timeout: 60000
+  # 最大重试次数（可选，默认 3）
+  max-retries: 3
+
