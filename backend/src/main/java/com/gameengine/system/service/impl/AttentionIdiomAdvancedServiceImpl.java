@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.gameengine.common.utils.ResourcesContstants;
 import com.gameengine.system.domain.AttentionIdiomAdvancedRecord;
 import com.gameengine.system.domain.AttentionIdiomInfo;
 import com.gameengine.system.domain.dto.DeepSeekChatResponse;
@@ -360,7 +361,7 @@ public class AttentionIdiomAdvancedServiceImpl implements IAttentionIdiomAdvance
         }
         
         try {
-            ClassPathResource resource = new ClassPathResource("video.json");
+            ClassPathResource resource = new ClassPathResource(ResourcesContstants.IDIOM_JSON);
             InputStream inputStream = resource.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();

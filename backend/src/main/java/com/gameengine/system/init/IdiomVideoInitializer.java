@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.gameengine.common.utils.ResourcesContstants;
 import com.gameengine.system.domain.AttentionIdiomInfo;
 import com.gameengine.system.mapper.AttentionIdiomInfoMapper;
 import com.gameengine.system.service.IAttentionIdiomAdvancedService;
@@ -55,16 +57,16 @@ public class IdiomVideoInitializer implements ApplicationRunner {
         }
 
         Set<String> processed = new HashSet<>();
-        for (VideoEntry entry : entries) {
+        CompletableFuture.allOf(entries.stream().map(entry -> CompletableFuture.runAsync(() -> {
             if (entry == null || !StringUtils.hasText(entry.getIdiom()) || !processed.add(entry.getIdiom())) {
-                continue;
+                return;
             }
 
             String idiom = entry.getIdiom().trim();
             AttentionIdiomInfo existing = attentionIdiomInfoMapper
                     .selectOne(new QueryWrapper<AttentionIdiomInfo>().eq("idiom", idiom));
             if (existing != null && StringUtils.hasText(existing.getVideoUrl())) {
-                continue;
+                return;
             }
 
             try {
@@ -82,12 +84,12 @@ public class IdiomVideoInitializer implements ApplicationRunner {
             } catch (Exception e) {
                 log.warn("初始化成语 [{}] 失败：{}", idiom, e.getMessage());
             }
-        }
+        })).toArray(CompletableFuture[]::new)).join();
     }
 
     private List<VideoEntry> loadVideoEntries() {
         List<VideoEntry> results = new ArrayList<>();
-        ClassPathResource resource = new ClassPathResource("video.json");
+        ClassPathResource resource = new ClassPathResource(ResourcesContstants.IDIOM_JSON);
         try (InputStream inputStream = resource.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             StringBuilder sb = new StringBuilder();
