@@ -49,7 +49,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: druid
+    active: local
   # Flyway 数据库版本管理配置
   flyway:
     # 是否启用 Flyway
@@ -118,61 +118,3 @@ token:
   secret: GameEngineManagerSecretKeyForJWTTokenGenerationMustBeAtLeast64CharactersLongForHS512AlgorithmSecurity
   # 令牌有效期（默认1440分钟，单位：分钟,一天）
   expireTime: 1440
-
-social:
-  auth:
-    # 统一回调基础路径，默认 http://localhost:18080/gameweb/oauth/callback
-    redirectBase: https://vip.opencao.cn/api/oauth/callback
-    # redirectBase: http://localhost:18080/gameweb/oauth/callback
-    wechat:
-      clientId: ${WECHAT_APP_ID:wxbe8ccd279e797514}
-      clientSecret: ${WECHAT_APP_SECRET:c5024ab92271de5ae3b2fe1178faac5e}
-      redirectUri: ${WECHAT_REDIRECT:${social.auth.redirectBase}/wechat}
-      token: myToken
-    qq:
-      clientId: ${QQ_APP_ID:1112481456}
-      clientSecret: ${QQ_APP_SECRET:FkUwPGsi2KqmKgbK}
-      redirectUri: ${QQ_REDIRECT:${social.auth.redirectBase}/qq}
-      unionId: true
-    feishu:
-      clientId: ${FEISHU_APP_ID:cli_a88d092e52f8101c}
-      clientSecret: ${FEISHU_APP_SECRET:Q4j2KBeQ9qQ1Symr9JBO8cVMVRhiZrqL}
-      redirectUri: ${FEISHU_REDIRECT:${social.auth.redirectBase}/feishu}
-    dingtalk:
-      clientId: ${DINGTALK_APP_ID:ding3d692f82974f21103f3c86269698130}
-      clientSecret: ${DINGTALK_APP_SECRET:92f82974f21103f3c86269698130}
-      redirectUri: ${DINGTALK_REDIRECT:${social.auth.redirectBase}/dingtalk}
-
-# SpringDoc OpenAPI (Swagger) 配置
-springdoc:
-  api-docs:
-    # API 文档路径
-    path: /v3/api-docs
-    # 是否启用
-    enabled: true
-  swagger-ui:
-    # Swagger UI 路径
-    path: /swagger-ui.html
-    # 是否启用
-    enabled: true
-  # 扫描的包路径
-  packages-to-scan: com.gameengine
-  # 扫描的路径
-  paths-to-match: /**
-  # 使用 Knife4j (Bootstrap UI)
-  knife4j:
-    enable: true
-
-# DeepSeek AI 配置
-deepseek:
-  # API Key（必填，从环境变量或配置文件中获取）
-  api-key: ${DEEPSEEK_API_KEY:sk-a649614b04134a86a2489cde22212547}
-  # API 基础 URL（可选，默认使用官方地址）
-  base-url: https://api.deepseek.com
-  # 默认模型（可选，默认为 deepseek-chat）
-  default-model: deepseek-chat
-  # 请求超时时间（毫秒，可选，默认 60000）
-  timeout: 60000
-  # 最大重试次数（可选，默认 3）
-  max-retries: 3
-
