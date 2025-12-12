@@ -7,4 +7,5 @@ public class ResourcesContstants {
 
 	public static final String VIDEO_JSON = "video.json";
 	public static final String IDIOM_JSON = "idiom.json";
+	public static final String POEM_JSON = "poem.json";
 }

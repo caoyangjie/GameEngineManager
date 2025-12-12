@@ -106,15 +106,30 @@ def write_video_json(
         ]
     }
     """
-    payload = {
-        "source": source,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "videos": videos,
-    }
 
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    """ 
+    请先读取目标文件中的内容,然后与当前传入的json合并后一起写入目标文件
+    """
+    if os.path.exists(output_path):
+        with open(output_path, "r", encoding="utf-8") as f:
+            existing_json = json.load(f)
+    else:
+        existing_json = {
+            "source": source,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "videos": videos,
+        }
+    # 确保 existing_json 中有 "videos" 键
+    if "videos" not in existing_json:
+        existing_json["videos"] = []
+
+    # 合并 existing_videos 和 videos
+    existing_videos = existing_json["videos"]
+    existing_videos.extend(videos)  # 将新的视频合并到现有的视频列表中
+    
+    # 将合并后的结果写回到目标文件中
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+        json.dump(existing_json, f, ensure_ascii=False, indent=2)
 
 
 def run(url: str, output: Optional[str]) -> str:
