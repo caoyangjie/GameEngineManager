@@ -27,5 +27,10 @@ public interface IAttentionTextFocusService {
      * 查询用户的历史记录
      */
     List<AttentionTextFocusRecord> getRecordsByUserId(Long userId, Integer limit);
+
+    /**
+     * 更新指定内容的音频地址
+     */
+    void updateContentAudioUrl(Long contentId, String audioUrl);
 }
 

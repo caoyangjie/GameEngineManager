@@ -32,6 +32,9 @@ public class AttentionTextFocusContent {
     /** 题目及答案列表（JSON 字符串） */
     private String questionsJson;
 
+    /** 题目语音音频地址 */
+    private String audioUrl;
+
     /** 生成来源模型 */
     private String sourceModel;
 
@@ -98,6 +101,14 @@ public class AttentionTextFocusContent {
 
     public void setQuestionsJson(String questionsJson) {
         this.questionsJson = questionsJson;
+    }
+
+    public String getAudioUrl() {
+        return audioUrl;
+    }
+
+    public void setAudioUrl(String audioUrl) {
+        this.audioUrl = audioUrl;
     }
 
     public String getSourceModel() {

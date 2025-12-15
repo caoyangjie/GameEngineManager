@@ -156,6 +156,18 @@ public class AttentionTextFocusServiceImpl implements IAttentionTextFocusService
         return recordMapper.selectList(wrapper);
     }
 
+    @Override
+    public void updateContentAudioUrl(Long contentId, String audioUrl) {
+        if (contentId == null) {
+            throw new IllegalArgumentException("内容 ID 不能为空");
+        }
+        AttentionTextFocusContent entity = new AttentionTextFocusContent();
+        entity.setId(contentId);
+        entity.setAudioUrl(audioUrl);
+        entity.setUpdateTime(new Date());
+        contentMapper.updateById(entity);
+    }
+
     private String extractJsonArray(String raw) {
         if (raw == null) {
             throw new IllegalArgumentException("模型返回为空");

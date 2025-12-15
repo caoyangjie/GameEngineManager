@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -105,6 +106,18 @@ public class AttentionTextFocusController extends BaseController {
         } catch (Exception e) {
             log.error("获取文字专注力训练记录失败", e);
             return error("获取失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "更新内容音频地址", description = "在生成题目语音后更新对应内容的 audio_url 字段")
+    @PostMapping("/contents/{id}/audioUrl")
+    public AjaxResult updateAudioUrl(@PathVariable("id") Long id, @RequestParam("audioUrl") String audioUrl) {
+        try {
+            textFocusService.updateContentAudioUrl(id, audioUrl);
+            return success();
+        } catch (Exception e) {
+            log.error("更新文字专注力内容音频地址失败", e);
+            return error("更新失败：" + e.getMessage());
         }
     }
 
