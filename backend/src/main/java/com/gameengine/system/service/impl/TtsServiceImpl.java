@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TtsServiceImpl implements ITtsService {
     
     private static final String API_URL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation";
-    private static final String MODEL = "qwen3-tts-flash";
+    private static final String MODEL = "qwen3-tts-flash-2025-11-27";
     
     @Value("${dashscope.tts.apiKey:}")
     private String apiKey;
