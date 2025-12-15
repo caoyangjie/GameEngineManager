@@ -14,6 +14,9 @@ gameengine:
   addressEnabled: false
   # 验证码类型 math 数组计算 char 字符验证
   captchaType: math
+  audio:
+    # 音频文件本地存储目录（可通过环境变量 GAMEENGINE_AUDIO_SAVE_PATH 覆盖）
+    save-path: ${GAMEENGINE_AUDIO_SAVE_PATH:/hxcloud/ai/cursor_workspace/TemplateProject/GameEngineManager/backend/videos}
 
 # 开发环境配置
 server:

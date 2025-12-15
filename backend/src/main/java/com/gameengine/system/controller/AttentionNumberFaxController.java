@@ -19,6 +19,7 @@ import com.gameengine.system.domain.AttentionNumberFaxRecord;
 import com.gameengine.system.domain.SysUser;
 import com.gameengine.system.service.IAttentionNumberFaxService;
 import com.gameengine.system.service.ISysUserService;
+import com.gameengine.system.service.impl.AudioStorageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +34,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/attention/numberFax/records")
 public class AttentionNumberFaxController extends BaseController {
     
+    private static final String BEARER_PREFIX = "Bearer ";
+    
     @Autowired
     private IAttentionNumberFaxService attentionNumberFaxService;
     
@@ -42,24 +45,27 @@ public class AttentionNumberFaxController extends BaseController {
     @Autowired
     private ISysUserService userService;
     
+    @Autowired
+    private AudioStorageService audioStorageService;
+    
     /**
      * 保存训练记录
      * 
-     * @param record 训练记录
-     * @param request HTTP请求
+     * @param faxRecord 训练记录
+     * @param httpRequest HTTP请求
      * @return 保存结果
      */
     @Operation(summary = "保存训练记录", description = "保存数字传真训练记录，包含目标数字、数字组、语音包地址、答案等信息")
     @PostMapping
-    public AjaxResult saveRecord(@RequestBody AttentionNumberFaxRecord record, HttpServletRequest request) {
+    public AjaxResult saveRecord(@RequestBody AttentionNumberFaxRecord faxRecord, HttpServletRequest httpRequest) {
         try {
-            Long userId = getUserIdFromRequest(request);
+            Long userId = getUserIdFromRequest(httpRequest);
             if (userId == null) {
                 return error("未登录或token无效");
             }
             
             // 忽略前端传递的userId，始终使用从token中获取的userId
-            record.setUserId(userId);
+            faxRecord.setUserId(userId);
             
             // 根据userId获取用户名
             SysUser user = userService.selectUserById(userId);
@@ -69,26 +75,32 @@ public class AttentionNumberFaxController extends BaseController {
                 if (username == null || username.trim().isEmpty()) {
                     username = user.getUserName();
                 }
-                record.setUsername(username != null ? username : "匿名用户");
+                faxRecord.setUsername(username != null ? username : "匿名用户");
             } else {
-                record.setUsername("匿名用户");
+                faxRecord.setUsername("匿名用户");
             }
             
             // 验证必填字段
-            if (record.getTargetNumber() == null) {
+            if (faxRecord.getTargetNumber() == null) {
                 return error("目标数字无效");
             }
-            if (record.getGroupCount() == null || record.getGroupCount() <= 0) {
+            if (faxRecord.getGroupCount() == null || faxRecord.getGroupCount() <= 0) {
                 return error("数字组数无效");
             }
-            if (record.getGroups() == null || record.getGroups().trim().isEmpty()) {
+            if (faxRecord.getGroupsJson() == null || faxRecord.getGroupsJson().trim().isEmpty()) {
                 return error("数字组数据无效");
             }
-            if (record.getCorrectAnswer() == null) {
+            if (faxRecord.getCorrectAnswer() == null) {
                 return error("正确答案无效");
             }
             
-            AttentionNumberFaxRecord savedRecord = attentionNumberFaxService.saveRecord(record);
+            // 如果前端传来音频内容（Base64 或 URL），在入库前先落盘到本地目录
+            if (faxRecord.getAudioUrl() != null && !faxRecord.getAudioUrl().trim().isEmpty()) {
+                String savedPath = audioStorageService.saveAudio(faxRecord.getAudioUrl(), "numberfax");
+                faxRecord.setAudioUrl(savedPath);
+            }
+            
+            AttentionNumberFaxRecord savedRecord = attentionNumberFaxService.saveRecord(faxRecord);
             return success(savedRecord);
         } catch (Exception e) {
             logger.error("保存训练记录失败", e);
@@ -119,8 +131,8 @@ public class AttentionNumberFaxController extends BaseController {
      */
     private Long getUserIdFromRequest(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
+        if (token != null && token.startsWith(BEARER_PREFIX)) {
+            token = token.substring(BEARER_PREFIX.length());
         }
         if (token == null) {
             return null;

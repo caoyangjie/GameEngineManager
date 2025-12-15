@@ -34,7 +34,7 @@ public class AttentionNumberFaxRecord {
     private Integer groupCount;
     
     /** 所有数字组（JSON字符串） */
-    private String groups;
+    private String groupsJson;
     
     /** 语音包下载地址 */
     private String audioUrl;
@@ -96,12 +96,12 @@ public class AttentionNumberFaxRecord {
         this.groupCount = groupCount;
     }
     
-    public String getGroups() {
-        return groups;
+    public String getGroupsJson() {
+        return groupsJson;
     }
     
-    public void setGroups(String groups) {
-        this.groups = groups;
+    public void setGroupsJson(String groupsJson) {
+        this.groupsJson = groupsJson;
     }
     
     public String getAudioUrl() {
