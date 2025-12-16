@@ -38,6 +38,9 @@ public class WritingTrainingRecord {
     /** 作答内容（Markdown 文本） */
     private String content;
 
+    /** 是否示例答案：true-示例，false-用户作答 */
+    private Boolean isExample;
+
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
@@ -108,6 +111,14 @@ public class WritingTrainingRecord {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Boolean getIsExample() {
+        return isExample;
+    }
+
+    public void setIsExample(Boolean isExample) {
+        this.isExample = isExample;
     }
 
     public Date getCreateTime() {

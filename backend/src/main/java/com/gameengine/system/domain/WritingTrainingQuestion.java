@@ -34,6 +34,17 @@ public class WritingTrainingQuestion {
     /** 题目内容 */
     private String content;
 
+    /**
+     * 示例答案 JSON 数组
+     *
+     * 结构示例：
+     * [
+     *   "示例答案1",
+     *   "示例答案2"
+     * ]
+     */
+    private String samplesJson;
+
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
@@ -84,6 +95,14 @@ public class WritingTrainingQuestion {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getSamplesJson() {
+        return samplesJson;
+    }
+
+    public void setSamplesJson(String samplesJson) {
+        this.samplesJson = samplesJson;
     }
 
     public Date getCreateTime() {

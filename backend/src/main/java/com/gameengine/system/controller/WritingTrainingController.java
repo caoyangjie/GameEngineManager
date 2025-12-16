@@ -1,5 +1,6 @@
 package com.gameengine.system.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,15 @@ public class WritingTrainingController extends BaseController {
     /**
      * 批量保存 AI 生成的题目
      *
-     * 请求体：{ moduleKey, moduleTitle, difficulty, questions: string[] }
+     * 请求体（兼容两种格式）：
+     * 1）旧格式：{ moduleKey, moduleTitle, difficulty, questions: string[] }
+     * 2）新格式：{
+     *      moduleKey,
+     *      moduleTitle,
+     *      difficulty,
+     *      questions: string[],
+     *      items: [{ content: '题目', samples: ['示例答案1', ...] }]
+     *    }
      */
     @Operation(summary = "批量保存写作训练题目")
     @PostMapping("/questions/batch")
@@ -68,11 +77,121 @@ public class WritingTrainingController extends BaseController {
             @SuppressWarnings("unchecked")
             List<String> questions = (List<String>) body.get("questions");
 
-            List<WritingTrainingQuestion> saved = writingTrainingService.saveQuestions(userId, moduleKey, moduleTitle, difficulty, questions);
+            // 新格式：items 数组，包含题目与示例答案
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> items = (List<Map<String, Object>>) body.get("items");
+
+            List<String> normalizedQuestions = new ArrayList<>();
+            List<List<String>> sampleAnswers = new ArrayList<>();
+
+            if (items != null && !items.isEmpty()) {
+                for (Map<String, Object> item : items) {
+                    if (item == null) {
+                        continue;
+                    }
+                    Object contentObj = item.get("content");
+                    String content = contentObj != null ? contentObj.toString().trim() : null;
+                    if (content == null || content.isEmpty()) {
+                        continue;
+                    }
+                    normalizedQuestions.add(content);
+
+                    @SuppressWarnings("unchecked")
+                    List<Object> samplesObj = (List<Object>) item.get("samples");
+                    List<String> oneSamples = new ArrayList<>();
+                    if (samplesObj != null) {
+                        for (Object s : samplesObj) {
+                            if (s != null) {
+                                String text = s.toString().trim();
+                                if (!text.isEmpty()) {
+                                    oneSamples.add(text);
+                                }
+                            }
+                        }
+                    }
+                    sampleAnswers.add(oneSamples);
+                }
+            } else if (questions != null) {
+                // 纯题目模式：没有示例答案
+                normalizedQuestions.addAll(questions);
+            }
+
+            List<WritingTrainingQuestion> saved = writingTrainingService.saveQuestions(
+                    userId, moduleKey, moduleTitle, difficulty, normalizedQuestions, sampleAnswers.isEmpty() ? null : sampleAnswers);
             return success(saved);
         } catch (Exception e) {
             log.error("保存写作训练题目失败", e);
             return error("保存失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 调用 DeepSeek 生成写作训练题目并保存
+     *
+     * 请求体：
+     * {
+     *   moduleKey: string,
+     *   moduleTitle?: string,
+     *   difficulty?: string, // primary_low/primary_high/middle/high
+     *   count?: number       // 1-10，默认 8
+     * }
+     */
+    @Operation(summary = "AI 生成写作训练题目", description = "后端调用 DeepSeek 生成题目及示例答案并保存到数据库")
+    @PostMapping("/questions/generate")
+    public AjaxResult generateQuestions(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+        try {
+            Long userId = getUserIdFromRequest(request);
+            if (userId == null) {
+                return error("用户未登录");
+            }
+            String moduleKey = (String) body.get("moduleKey");
+            String moduleTitle = (String) body.get("moduleTitle");
+            String difficulty = (String) body.get("difficulty");
+            Object countObj = body.get("count");
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> templateObjs = (List<Map<String, Object>>) body.get("templates");
+            List<String> expressionTemplates = new ArrayList<>();
+            if (templateObjs != null) {
+                for (Map<String, Object> t : templateObjs) {
+                    if (t == null) {
+                        continue;
+                    }
+                    Object labelObj = t.get("label");
+                    Object textObj = t.get("text");
+                    String label = labelObj != null ? labelObj.toString().trim() : "";
+                    String text = textObj != null ? textObj.toString().trim() : "";
+                    if (!text.isEmpty()) {
+                        String merged = label.isEmpty() ? text : (label + "：" + text);
+                        expressionTemplates.add(merged);
+                    }
+                }
+            } else {
+                @SuppressWarnings("unchecked")
+                List<String> templateStrings = (List<String>) body.get("templates");
+                if (templateStrings != null) {
+                    for (String t : templateStrings) {
+                        if (t != null && !t.trim().isEmpty()) {
+                            expressionTemplates.add(t.trim());
+                        }
+                    }
+                }
+            }
+            int count = 8;
+            if (countObj instanceof Number) {
+                count = ((Number) countObj).intValue();
+            } else if (countObj instanceof String) {
+                try {
+                    count = Integer.parseInt((String) countObj);
+                } catch (NumberFormatException ignore) {
+                }
+            }
+
+            List<WritingTrainingQuestion> saved = writingTrainingService.generateQuestions(
+                    userId, moduleKey, moduleTitle, difficulty, count, expressionTemplates);
+            return success(saved);
+        } catch (Exception e) {
+            log.error("AI 生成写作训练题目失败", e);
+            return error("生成失败：" + e.getMessage());
         }
     }
 
@@ -198,11 +317,12 @@ public class WritingTrainingController extends BaseController {
     /**
      * 分页查询训练记录
      *
-     * GET /writing-training/records/list?moduleKey=...&pageNum=1&pageSize=20
+     * GET /writing-training/records/list?moduleKey=...&difficulty=...&pageNum=1&pageSize=20
      */
     @Operation(summary = "分页查询写作训练记录")
     @GetMapping("/records/list")
     public AjaxResult getRecordPage(@RequestParam(required = false) String moduleKey,
+                                    @RequestParam(required = false) String difficulty,
                                     @RequestParam(defaultValue = "1") Integer pageNum,
                                     @RequestParam(defaultValue = "20") Integer pageSize,
                                     HttpServletRequest request) {
@@ -212,7 +332,7 @@ public class WritingTrainingController extends BaseController {
                 return error("用户未登录");
             }
             Page<WritingTrainingRecord> page = new Page<>(pageNum, pageSize);
-            IPage<WritingTrainingRecord> result = writingTrainingService.getRecordPage(page, userId, moduleKey);
+            IPage<WritingTrainingRecord> result = writingTrainingService.getRecordPage(page, userId, moduleKey, difficulty);
 
             Map<String, Object> data = new HashMap<>();
             data.put("rows", result.getRecords());
@@ -221,6 +341,27 @@ public class WritingTrainingController extends BaseController {
             return success(data);
         } catch (Exception e) {
             log.error("查询写作训练记录失败", e);
+            return error("查询失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 根据题目 ID 查询该题目的所有训练记录（当前登录用户）
+     *
+     * GET /writing-training/records/by-question?questionId=...
+     */
+    @Operation(summary = "根据题目 ID 查询训练记录")
+    @GetMapping("/records/by-question")
+    public AjaxResult getRecordsByQuestion(@RequestParam Long questionId, HttpServletRequest request) {
+        try {
+            Long userId = getUserIdFromRequest(request);
+            if (userId == null) {
+                return error("用户未登录");
+            }
+            List<WritingTrainingRecord> list = writingTrainingService.getRecordsByQuestionId(userId, questionId);
+            return success(list);
+        } catch (Exception e) {
+            log.error("根据题目 ID 查询写作训练记录失败", e);
             return error("查询失败：" + e.getMessage());
         }
     }
